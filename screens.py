@@ -11,7 +11,7 @@ from playlists import WidgetBrowseDatabase, WidgetListBrowseQueue
 widget_types = ['WidgetSongArt', 'WidgetSongInfo', 'WidgetSongTime', 'WidgetSongInfoNext',
                 'WidgetSongControls', 'WidgetSongPosition', 'WidgetSongControlsFull', 'WidgetPlayerVolume', 'WidgetPlayerMode', 'WidgetPlayerModeToggle',
                 'WidgetSongRating', 'WidgetSongRatingSafe', 'WidgetSongFavorite', 'WidgetSongFavoriteSafe', 'WidgetSongRatingFavorite', 'WidgetSongRatingFavoriteSafe', 'WidgetAddToPlaylist',
-                'WidgetBrowseDatabase', 'WidgetListBrowseQueue', 'WidgetQueuePresets', 'WidgetQueuePlaylist', 'WidgetPlaylistRandom', 'WidgetPlaylistLoads', 'WidgetPlaylistLoadsRandom', 'WidgetQueueSimilar',
+                'WidgetBrowseDatabase', 'WidgetListBrowseQueue', 'WidgetQueuePresets', 'WidgetQueuePlaylist', 'WidgetPlaylistUndo', 'WidgetPlaylistLoads', 'WidgetPlaylistLoadsRandom', 'WidgetQueueSimilar',
                 'WidgetEmpty', 'WidgetNoScreen', 'WidgetLog']
 swipe_modes = ['none', 'song', 'volume', 'favorite', 'mode', 'skip', 'queue shuffle', 'queue random', 'queue genre', 'queue artist', 'queue album', 'queue same']
 
@@ -89,23 +89,23 @@ Builder.load_string("""
         text: "Current Queue Browser"
         on_release: root.owner.add_new_widget("WidgetListBrowseQueue")
     MenuButton:
-        text: "Quick Queue Presets"
+        text: "Quick Queue Presets Menu"
         on_release: root.owner.add_new_widget("WidgetQueuePresets")
     MenuButton:
-        text: "Quick Queue A Playlist"
+        text: "Queue Playlist Menu"
         on_release: root.owner.add_new_widget("WidgetQueuePlaylist")
     MenuButton:
-        text: "Quick Queue Random Songs"
-        on_release: root.owner.add_new_widget("WidgetPlaylistRandom")
-    MenuButton:
-        text: "Quick Queue Similar To Playing"
+        text: "Queue Playing Genre/Artist/Album"
         on_release: root.owner.add_new_widget("WidgetPlaylistLoads")
     MenuButton:
-        text: "Quick Queue Random Types"
+        text: "Queue Random Songs/Genre/Artist/Album"
         on_release: root.owner.add_new_widget("WidgetPlaylistLoadsRandom")
     MenuButton:
-        text: "Quick Queue Similar To Last"
+        text: "Queue Similar To Last Queue"
         on_release: root.owner.add_new_widget("WidgetQueueSimilar")
+    MenuButton:
+        text: "Undo Queue Changes"
+        on_release: root.owner.add_new_widget("WidgetPlaylistUndo")
 
     NormalLabel:
         text: "Other"

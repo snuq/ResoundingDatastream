@@ -16,7 +16,7 @@ screen_presets = {
     "Queue Browser": ["queue screen", "WidgetListBrowseQueue::3.0|WidgetSongControls::0.5"],
     "Queue Browser Extra": ["queue extra", "WidgetListBrowseQueue::4.0|WidgetSongControlsFull::0.5|WidgetPlaylistLoads::|WidgetPlaylistLoadsRandom::|WidgetQueueSimilar::0.5"],
     "Database": ["database", "WidgetBrowseDatabase:::"],
-    "Queue Options": ["queue options", "WidgetListBrowseQueue::0.5|WidgetQueueSimilar::0.5|WidgetPlaylistRandom::0.5|WidgetPlaylistLoads::|WidgetPlaylistLoadsRandom::|WidgetQueuePresets::0.5|WidgetQueuePlaylist::0.5"]}
+    "Queue Options": ["queue options", "WidgetListBrowseQueue::0.5|WidgetQueueSimilar::0.5|WidgetPlaylistLoads::|WidgetPlaylistLoadsRandom::|WidgetQueuePresets::0.5|WidgetQueuePlaylist::0.5"]}
 
 Builder.load_string("""
 <ScreenSettingsPopup>:

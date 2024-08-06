@@ -514,39 +514,29 @@ Builder.load_string("""
         text: 'Quick Queue Presets...'
         on_release: self.open_presets_menu(self)
 
-<WidgetPlaylistRandom>:
-    swipe_mode: 'queue random'
+<WidgetPlaylistUndo>:
+    swipe_mode: 'none'
     cols: 2
     ElementButton:
-        text: "Undo Queue"
+        text: "Undo Queue Change"
         on_release: root.player.queue_undo()
         disabled: not root.queue_history
-    ElementButton:
-        text: "Queue Random"
-        on_release: root.player.queue_random()
 
 <WidgetPlaylistLoads>:
     swipe_mode: 'none'
     cols: 3
-    ElementLabel:
-        scale: min(self.height, self.width / 3)
-        text: 'Queue Current:'
     ElementButton:
-        text: "Genre"
+        text: "Queue Playing Genre"
         on_release: root.player.queue_same_genre()
         disabled: not root.song_id or not root.song_genre
     ElementButton:
-        text: "Artist"
+        text: "Queue Playing Artist"
         on_release: root.player.queue_same_artist()
         disabled: not root.song_id or not root.song_artist_id
     ElementButton:
-        text: "Album"
+        text: "Queue Playing Album"
         on_release: root.player.queue_same_album()
         disabled: not root.song_id or not root.song_album_id
-    ElementButton:
-        text: "Undo"
-        on_release: root.player.queue_undo()
-        disabled: not root.queue_history
 
 <WidgetPlaylistLoadsRandom>:
     swipe_mode: 'none'
@@ -1473,8 +1463,8 @@ class WidgetPlayerMode(ElementWidget):
         self.reset_buttons()
 
 
-class WidgetPlaylistRandom(ElementWidget):
-    #Loads a random list of songs into the queue.
+class WidgetPlaylistUndo(ElementWidget):
+    #Undo queue changes
     queue_history = ListProperty()
 
     def on_player(self, *_):
