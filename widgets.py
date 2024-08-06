@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from kivy.clock import mainthread
+from kivy.clock import mainthread, Clock
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.slider import Slider
@@ -376,12 +376,28 @@ Builder.load_string("""
 
 <WidgetSongRating>:
     swipe_mode: 'song'
-    cols: 1
+    cols: 3
+    Widget:
+        size_hint_x: 0.1
     ElementRating:
+        size_hint_max_x: self.height * 5
+        size_hint_x: 5
         element_type: 'song'
         rating: root.song_rating
         player: root.player
         song_id: root.song_id
+    Widget:
+        size_hint_x: 0.1
+
+<WidgetSongRatingSafe>:
+    canvas.after:
+        Color:
+            rgba: app.theme.active if root.block_first_blocking else [0, 0, 0, 0]
+        Line:
+            rounded_rectangle: self.x+3, self.y+3, self.width-6, self.height-6, 5
+            width: 3
+    block_first: True
+    swipe_mode: 'none'
 
 <WidgetSongFavorite>:
     swipe_mode: 'favorite'
@@ -392,6 +408,16 @@ Builder.load_string("""
         song_id: root.song_id
         player: root.player
 
+<WidgetSongFavoriteSafe>:
+    canvas.after:
+        Color:
+            rgba: app.theme.active if root.block_first_blocking else [0, 0, 0, 0]
+        Line:
+            rounded_rectangle: self.x+3, self.y+3, self.width-6, self.height-6, 5
+            width: 3
+    block_first: True
+    swipe_mode: 'none'
+
 <WidgetSongRatingFavorite>:
     swipe_mode: 'rating'
     cols: 3
@@ -399,6 +425,7 @@ Builder.load_string("""
         element_type: 'song'
         rating: root.song_rating
         size_hint_x: 5
+        size_hint_max_x: self.height * 5
         song_id: root.song_id
         player: root.player
     Widget:
@@ -408,6 +435,16 @@ Builder.load_string("""
         song_favorite: root.song_favorite
         song_id: root.song_id
         player: root.player
+
+<WidgetSongRatingFavoriteSafe>:
+    canvas.after:
+        Color:
+            rgba: app.theme.active if root.block_first_blocking else [0, 0, 0, 0]
+        Line:
+            rounded_rectangle: self.x+3, self.y+3, self.width-6, self.height-6, 5
+            width: 3
+    block_first: True
+    swipe_mode: 'none'
 
 <WidgetPlayerVolume>:
     swipe_mode: 'volume'
@@ -894,6 +931,9 @@ class ElementWidget(GridLayout):
     swipe_distance = 50
     swipe_time = NumericProperty(0.2)
     activate_tap = BooleanProperty(False)
+    block_first = BooleanProperty(False)
+    block_first_blocking = BooleanProperty(True)
+    toggle_block_first = None
 
     def reload(self):
         pass
@@ -997,6 +1037,10 @@ class ElementWidget(GridLayout):
                 player.queue_undo()
                 app.speak('undo queue change')
 
+    def end_block_first(self, *_):
+        self.block_first_blocking = True
+        self.toggle_block_first = None
+
     def on_touch_down(self, touch):
         if self.bypass_swipes and not self.blocked:
             return super().on_touch_down(touch)
@@ -1005,6 +1049,18 @@ class ElementWidget(GridLayout):
                 self.screen.select(self)
             if self.blocked:
                 return
+
+            if self.block_first:
+                if self.block_first_blocking:
+                    self.block_first_blocking = False
+                    self.toggle_block_first = Clock.schedule_once(self.end_block_first, 3)
+                    return True
+                else:
+                    if self.toggle_block_first:
+                        self.toggle_block_first.cancel()
+                        self.toggle_block_first = None
+                    self.block_first_blocking = True
+
             touch.grab(self)
             super().on_touch_down(touch)
 
@@ -1321,6 +1377,10 @@ class WidgetSongRating(ElementWidget):
         self.player.bind(song_rating=self.setter('song_rating'))
 
 
+class WidgetSongRatingSafe(WidgetSongRating):
+    pass
+
+
 class WidgetSongFavorite(ButtonBehavior, ElementWidget):
     #Displays and changes the favorite tag of the current song.
     song_favorite = BooleanProperty(False)
@@ -1331,6 +1391,10 @@ class WidgetSongFavorite(ButtonBehavior, ElementWidget):
         self.song_favorite = self.player.song_favorite
         self.player.bind(song_id=self.setter('song_id'))
         self.player.bind(song_favorite=self.setter('song_favorite'))
+
+
+class WidgetSongFavoriteSafe(WidgetSongFavorite):
+    pass
 
 
 class WidgetSongRatingFavorite(ElementWidget):
@@ -1346,6 +1410,10 @@ class WidgetSongRatingFavorite(ElementWidget):
         self.player.bind(song_id=self.setter('song_id'))
         self.player.bind(song_rating=self.setter('song_rating'))
         self.player.bind(song_favorite=self.setter('song_favorite'))
+
+
+class WidgetSongRatingFavoriteSafe(WidgetSongRatingFavorite):
+    pass
 
 
 #Player - widgets that change player and queue settings

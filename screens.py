@@ -8,7 +8,11 @@ from snu.button import WideButton, NormalButton, NormalDropDown, MenuButton, Nor
 from widgets import *
 from playlists import WidgetBrowseDatabase, WidgetListBrowseQueue
 
-widget_types = ['WidgetSongArt', 'WidgetSongInfo', 'WidgetSongInfoNext', 'WidgetSongControls', 'WidgetSongPosition', 'WidgetSongRatingFavorite', 'WidgetSongRating', 'WidgetSongFavorite', 'WidgetPlayerVolume', 'WidgetPlayerMode', 'WidgetPlaylistRandom', 'WidgetPlaylistLoads', 'WidgetPlaylistLoadsRandom', 'WidgetQueueSimilar', 'WidgetListBrowseQueue', 'WidgetListBrowseDatabase', 'WidgetEmpty', 'WidgetNoScreen', 'WidgetSongControlsFull', 'WidgetSongTime', 'WidgetBrowseDatabase', 'WidgetAddToPlaylist', 'WidgetLog', 'WidgetPlayerModeToggle', 'WidgetQueuePlaylist', 'WidgetQueuePresets']
+widget_types = ['WidgetSongArt', 'WidgetSongInfo', 'WidgetSongTime', 'WidgetSongInfoNext',
+                'WidgetSongControls', 'WidgetSongPosition', 'WidgetSongControlsFull', 'WidgetPlayerVolume', 'WidgetPlayerMode', 'WidgetPlayerModeToggle',
+                'WidgetSongRating', 'WidgetSongRatingSafe', 'WidgetSongFavorite', 'WidgetSongFavoriteSafe', 'WidgetSongRatingFavorite', 'WidgetSongRatingFavoriteSafe', 'WidgetAddToPlaylist',
+                'WidgetBrowseDatabase', 'WidgetListBrowseQueue', 'WidgetQueuePresets', 'WidgetQueuePlaylist', 'WidgetPlaylistRandom', 'WidgetPlaylistLoads', 'WidgetPlaylistLoadsRandom', 'WidgetQueueSimilar',
+                'WidgetEmpty', 'WidgetNoScreen', 'WidgetLog']
 swipe_modes = ['none', 'song', 'volume', 'favorite', 'mode', 'skip', 'queue shuffle', 'queue random', 'queue genre', 'queue artist', 'queue album', 'queue same']
 
 from kivy.lang.builder import Builder
@@ -58,11 +62,20 @@ Builder.load_string("""
         text: "Song Rating Setting"
         on_release: root.owner.add_new_widget("WidgetSongRating")
     MenuButton:
+        text: "Touch-Safe Song Rating Setting"
+        on_release: root.owner.add_new_widget("WidgetSongRatingSafe")
+    MenuButton:
         text: "Song Favorite Setting"
         on_release: root.owner.add_new_widget("WidgetSongFavorite")
     MenuButton:
+        text: "Touch-Safe Song Favorite Setting"
+        on_release: root.owner.add_new_widget("WidgetSongFavoriteSafe")
+    MenuButton:
         text: "Song Rating And Favorite"
         on_release: root.owner.add_new_widget("WidgetSongRatingFavorite")
+    MenuButton:
+        text: "Touch-Safe Rating And Favorite"
+        on_release: root.owner.add_new_widget("WidgetSongRatingFavoriteSafe")
     MenuButton:
         text: "Add Current Song To Playlist"
         on_release: root.owner.add_new_widget("WidgetAddToPlaylist")
