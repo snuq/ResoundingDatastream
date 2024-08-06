@@ -505,14 +505,14 @@ Builder.load_string("""
 
 <WidgetQueuePresets>:
     cols: 1
-    QueuePresetsMenuStarter:
+    WideMenuStarter:
         scale: min(self.height, self.width / 6)
         padding: self.scale / 4
         font_size: self.scale / 3
         player: root.player
         size_hint: 1, 1
         text: 'Quick Queue Presets...'
-        on_release: self.open_presets_menu(self)
+        on_release: root.open_presets_menu(self)
 
 <WidgetPlaylistUndo>:
     swipe_mode: 'none'
@@ -577,25 +577,24 @@ Builder.load_string("""
 
 <WidgetAddToPlaylist>:
     cols: 1
-    AddPlaylistMenuStarter:
+    WideMenuStarter:
         scale: min(self.height, self.width / 6)
         padding: self.scale / 4
         font_size: self.scale/3
-        player: root.player
         size_hint: 1, 1
         text: 'Add Current Song To Playlist...'
-        on_release: self.open_playlist_menu(self)
+        on_release: root.open_playlist_menu(self)
 
 <WidgetQueuePlaylist>:
     cols: 1
-    QueuePlaylistMenuStarter:
+    WideMenuStarter:
         scale: min(self.height, self.width / 6)
         padding: self.scale / 4
         font_size: self.scale/3
         player: root.player
         size_hint: 1, 1
         text: 'Quick Queue Playlist...'
-        on_release: self.open_playlist_menu(self)
+        on_release: root.open_playlist_menu(self)
 """)
 
 
@@ -832,59 +831,8 @@ class PlaylistMenuButton(MenuButton):
         self.owner.add_playlist(self.playlistid)
 
 
-class AddPlaylistMenuStarter(WideMenuStarter):
-    player = ObjectProperty(allownone=True)
-    playlist_menu = None
-
-    def add_playlist(self, playlistid):
-        self.playlist_menu.dismiss()
-        self.playlist_menu = None
-        self.player.playlist_add_current_song(playlistid)
-
-    def open_playlist_menu(self, button):
-        if self.playlist_menu:
-            self.playlist_menu.dismiss()
-        self.playlist_menu = NormalDropDown()
-        playlists = self.player.get_playlists()
-        for playlist in playlists:
-            menu_button = PlaylistMenuButton(owner=self, playlistid=playlist['id'], text=playlist['name'])
-            self.playlist_menu.add_widget(menu_button)
-        self.playlist_menu.open(button)
-
-
-class QueuePlaylistMenuStarter(WideMenuStarter):
-    player = ObjectProperty(allownone=True)
-    playlist_menu = None
-
-    def add_playlist(self, playlistid):
-        self.playlist_menu.dismiss()
-        self.playlist_menu = None
-        self.player.queue_playlist(playlistid)
-
-    def open_playlist_menu(self, button):
-        if self.playlist_menu:
-            self.playlist_menu.dismiss()
-        self.playlist_menu = NormalDropDown()
-        playlists = self.player.get_playlists()
-        for playlist in playlists:
-            menu_button = PlaylistMenuButton(owner=self, playlistid=playlist['id'], text=playlist['name'])
-            self.playlist_menu.add_widget(menu_button)
-        self.playlist_menu.open(button)
-
-
 class QueuePresetsMenu(NormalDropDown):
     player = ObjectProperty()
-
-
-class QueuePresetsMenuStarter(WideMenuStarter):
-    player = ObjectProperty(allownone=True)
-    presets_menu = None
-
-    def open_presets_menu(self, button):
-        if self.presets_menu:
-            self.presets_menu.dismiss()
-        self.presets_menu = QueuePresetsMenu(player=self.player)
-        self.presets_menu.open(button)
 
 
 class ImageButton(WideButton):
@@ -1408,7 +1356,22 @@ class WidgetSongRatingFavoriteSafe(WidgetSongRatingFavorite):
 
 #Player - widgets that change player and queue settings
 class WidgetAddToPlaylist(ElementWidget):
-    pass
+    playlist_menu = None
+
+    def add_playlist(self, playlistid):
+        self.playlist_menu.dismiss()
+        self.playlist_menu = None
+        self.player.playlist_add_current_song(playlistid)
+
+    def open_playlist_menu(self, button):
+        if self.playlist_menu:
+            self.playlist_menu.dismiss()
+        self.playlist_menu = NormalDropDown()
+        playlists = self.player.get_playlists()
+        for playlist in playlists:
+            menu_button = PlaylistMenuButton(owner=self, playlistid=playlist['id'], text=playlist['name'])
+            self.playlist_menu.add_widget(menu_button)
+        self.playlist_menu.open(button)
 
 
 class WidgetPlayerVolume(ElementWidget):
@@ -1515,8 +1478,29 @@ class WidgetQueueSimilar(ElementWidget):
 
 
 class WidgetQueuePlaylist(ElementWidget):
-    pass
+    playlist_menu = None
+
+    def add_playlist(self, playlistid):
+        self.playlist_menu.dismiss()
+        self.playlist_menu = None
+        self.player.queue_playlist(playlistid)
+
+    def open_playlist_menu(self, button):
+        if self.playlist_menu:
+            self.playlist_menu.dismiss()
+        self.playlist_menu = NormalDropDown()
+        playlists = self.player.get_playlists()
+        for playlist in playlists:
+            menu_button = PlaylistMenuButton(owner=self, playlistid=playlist['id'], text=playlist['name'])
+            self.playlist_menu.add_widget(menu_button)
+        self.playlist_menu.open(button)
 
 
 class WidgetQueuePresets(ElementWidget):
-    pass
+    presets_menu = None
+
+    def open_presets_menu(self, button):
+        if self.presets_menu:
+            self.presets_menu.dismiss()
+        self.presets_menu = QueuePresetsMenu(player=self.player)
+        self.presets_menu.open(button)

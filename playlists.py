@@ -465,6 +465,7 @@ Builder.load_string("""
             on_scroll_y: root.scroll_database(self.scroll_y)
             scroll_type: ['content']
             bar_color: 0, 0, 0, 0
+            bar_width: 0
             bar_inactive_color: 0, 0, 0, 0
             scroll_distance: 10
             scroll_timeout: 400
