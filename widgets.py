@@ -502,6 +502,23 @@ Builder.load_string("""
         text: "Newest Songs"
         on_release: root.player.queue_preset('Newest')
         on_release: root.dismiss()
+    MenuButton:
+        text: "Random Genre"
+        on_release: root.player.queue_random_genre()
+        on_release: root.dismiss()
+    MenuButton:
+        text: "Random Artist"
+        on_release: root.player.queue_random_artist()
+        on_release: root.dismiss()
+    MenuButton:
+        text: "Random Album"
+        on_release: root.player.queue_random_album()
+        on_release: root.dismiss()
+    MenuButton:
+        text: "Random Songs"
+        on_release: root.player.queue_random(keepcurrent=False)
+        on_release: root.dismiss()
+
 
 <WidgetQueuePresets>:
     cols: 1

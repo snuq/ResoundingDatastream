@@ -14,9 +14,9 @@ screen_presets = {
     "Main Screen Simple": ["main simple", "WidgetSongArt::2.0|WidgetSongInfo::|WidgetSongTime::0.5|WidgetSongControlsFull::0.5|WidgetSongInfoNext::0.5|WidgetSongRatingFavorite::0.5"],
     "Main Screen Extra": ["main extra", "WidgetSongInfo::|WidgetSongTime::0.5|WidgetSongControls::|WidgetSongPosition::0.5|WidgetSongInfoNext::0.5|WidgetSongRatingFavorite::0.5|WidgetAddToPlaylist::0.5|WidgetPlayerMode::|WidgetListBrowseQueue::0.5|WidgetBrowseDatabase::0.5"],
     "Queue Browser": ["queue screen", "WidgetListBrowseQueue::3.0|WidgetSongControls::0.5"],
-    "Queue Browser Extra": ["queue extra", "WidgetListBrowseQueue::4.0|WidgetSongControlsFull::0.5|WidgetPlaylistLoads::|WidgetPlaylistLoadsRandom::|WidgetQueueSimilar::0.5"],
+    "Queue Browser Extra": ["queue extra", "WidgetListBrowseQueue::5.0|WidgetSongControlsFull::0.5|WidgetPlaylistLoads::0.5|WidgetQueuePresets::0.5|WidgetQueuePlaylist::0.5|WidgetQueueSimilar::0.5"],
     "Database": ["database", "WidgetBrowseDatabase:::"],
-    "Queue Options": ["queue options", "WidgetListBrowseQueue::0.5|WidgetQueueSimilar::0.5|WidgetPlaylistLoads::|WidgetPlaylistLoadsRandom::|WidgetQueuePresets::0.5|WidgetQueuePlaylist::0.5"]}
+    "Queue Options": ["queue options", "WidgetListBrowseQueue::0.5|WidgetQueueSimilar::0.5|WidgetPlaylistLoads::0.5|WidgetPlaylistLoadsRandom::|WidgetQueuePresets::0.5|WidgetQueuePlaylist::0.5"]}
 
 Builder.load_string("""
 <ScreenSettingsPopup>:

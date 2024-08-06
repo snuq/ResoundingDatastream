@@ -775,15 +775,15 @@ class Player(EventDispatcher):
         elif preset == 'Random Unplayed':
             data = self.database_get_search_song(query='', timeout=timeout)
             data = [song for song in data if song['playCount'] == 0]
-            data = sorted(data, key=lambda x: random.random())[:40]
+            data = sorted(data, key=lambda x: random.random())[:self.random_amount]
         elif preset == 'Recently Played':
             data = self.database_get_search_song(query='', timeout=timeout)
             data = [song for song in data if 'played' in song.keys()]
-            data = sorted(data, key=lambda x: x['played'], reverse=True)[:40]
+            data = sorted(data, key=lambda x: x['played'], reverse=True)[:self.random_amount]
         elif preset == 'Newest':
             data = self.database_get_search_song(query='', timeout=timeout)
             data = [song for song in data if 'created' in song.keys()]
-            data = sorted(data, key=lambda x: x['created'], reverse=True)[:40]
+            data = sorted(data, key=lambda x: x['created'], reverse=True)[:self.random_amount]
         else:  #preset == 'Favorite':
             data = self.database_get_song_list_favorite(timeout=timeout)
             queue_type = 'rating'
@@ -853,7 +853,7 @@ class Player(EventDispatcher):
 
     def queue_random_album_process(self, timeout):
         app = App.get_running_app()
-        albums = self.database_get_album_list_random(size=1, timeout=timeout)
+        albums = self.database_get_album_list_random(amount=1, timeout=timeout)
         if albums is None:
             return False
         if not albums:
