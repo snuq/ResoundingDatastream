@@ -1,6 +1,7 @@
 #todo:
 #   need to figure out how to receive wired headset media key on android
 #   bluetooth pause needs to be able to resume when app is not active
+#   if unable to set rating on playlist, will end up triggering long-press
 
 from kivy.config import Config
 Config.set('graphics', 'maxfps', '30')
@@ -1016,7 +1017,12 @@ class ResoundingDatastream(NormalApp):
                 else:
                     failed_remove += 1
                 continue
-            cache_newer = modified_date > database_timestamp
+            if modified_date is None:
+                modified_date = os.path.getmtime(filename)
+            if modified_date is None:
+                cache_newer = False
+            else:
+                cache_newer = modified_date > database_timestamp
             if not cache_newer:
                 #file is outdated, delete
                 if songid in self.local_cache_info.keys():
