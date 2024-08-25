@@ -2216,8 +2216,8 @@ class WidgetListQueue(WidgetListBrowse):
         self.player.bind(queue=self.setter('queue'))
         self.player.bind(queue_index=self.setter('queue_index'))
 
-    def on_queue_changed(self, *_):
-        if self.player.queue_changed:
+    def on_queue_changed(self, widget, changed):
+        if changed:
             self.queue = []
             self.queue = self.player.queue
             #self.on_queue()

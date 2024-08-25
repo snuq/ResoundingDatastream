@@ -498,6 +498,10 @@ class Player(EventDispatcher):
         if not songid:
             app.message('Unable to set rating')
             return
+        App.get_running_app().add_background_thread('rating '+songid, self.rating_set_process, args=(rating, songid, element_type))
+
+    def rating_set_process(self, rating, songid, element_type):
+        app = App.get_running_app()
         rating = int(round(rating))
         if rating > 5:
             rating = 5
@@ -515,6 +519,7 @@ class Player(EventDispatcher):
         else:
             app.message('Unable to set rating on: '+songid)
         self.queue_changed = True
+        app.end_background_thread('rating '+songid)
 
     def rating_up(self, rating=None, songid=None):
         if songid is None or rating is None:

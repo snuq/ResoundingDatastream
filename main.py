@@ -1,9 +1,7 @@
 #todo:
 #   need to figure out how to receive wired headset media key on android
 #   bluetooth pause needs to be able to resume when app is not active
-#   if unable to set rating on playlist, will end up triggering long-press
 #   add sort by rating
-#   issues when loading with no internet connection - queue doesnt fallback to local, cached lists dont load right now
 
 from kivy.config import Config
 Config.set('graphics', 'maxfps', '30')
@@ -1397,7 +1395,7 @@ class ResoundingDatastream(NormalApp):
                 data = json.load(file)
             if data:
                 self.player.queue_load_local(data, play=play, background=background)
-        except:
+        except Exception as e:
             if not background:
                 self.message("Unable to load local queue.")
 
@@ -1472,7 +1470,7 @@ class ResoundingDatastream(NormalApp):
     def database_created(self):
         self.close_not_connected_popup()
         if self.autoload_queue:
-            self.load_queue_local(False, background=True)
+            self.load_queue_local(None, background=True)
             self.player.queue_load(self.autoplay)
         else:
             self.player.database.get_ping()
