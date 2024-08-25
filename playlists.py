@@ -10,7 +10,7 @@ from kivy.app import App
 from kivy.core.window import Window
 from kivy.properties import *
 from kivy.uix.boxlayout import BoxLayout
-from snu.recycleview import NormalRecycleView, SelectableRecycleLayout, RecycleItem, RecycleGridLayout
+from snu.recycleview import SelectableRecycleLayout, RecycleItem, RecycleGridLayout
 from snu.button import NormalDropDown, WideButton, MenuButton
 from snu.label import NormalLabel, LeftNormalLabel
 from snu.popup import NormalPopup, ConfirmPopupContent, InputPopupContent
@@ -459,9 +459,10 @@ Builder.load_string("""
             id: alphaSelect
             scrollview: rvview
     BoxLayout:
-        NormalRecycleView:
+        RecycleView:
             id: rvview
             owner: root
+            do_scroll_x: False
             on_scroll_y: root.scroll_database(self.scroll_y)
             scroll_type: ['content']
             bar_color: 0, 0, 0, 0
@@ -1080,10 +1081,10 @@ class SongPlaylistElement(PlaylistElement):
     track = NumericProperty()
     year = NumericProperty()
     genre = StringProperty()
-    starred = BooleanProperty()
     duration = NumericProperty()
     playCount = NumericProperty()
     discNumber = NumericProperty()
+    starred = BooleanProperty()
     userRating = NumericProperty()
     show_ratings = BooleanProperty(False)
 

@@ -519,7 +519,6 @@ Builder.load_string("""
         on_release: root.player.queue_random(keepcurrent=False)
         on_release: root.dismiss()
 
-
 <WidgetQueuePresets>:
     cols: 1
     WideMenuStarter:
@@ -1100,6 +1099,13 @@ class ElementRating(Widget):
     blocked = BooleanProperty(False)
     element_type = StringProperty('song')
 
+    def __init__(self, **kwargs):
+        self.register_event_type('on_set_rating')
+        super().__init__(**kwargs)
+
+    def on_set_rating(self, widget):
+        pass
+
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
             touch.grab(self)
@@ -1114,6 +1120,7 @@ class ElementRating(Widget):
             if rating == self.rating:
                 rating = 0
             self.player.rating_set(rating, self.song_id, element_type=self.element_type)
+            self.dispatch('on_set_rating', widget=self)
 
 
 class ElementFavorite(Image):
@@ -1122,6 +1129,13 @@ class ElementFavorite(Image):
     song_favorite = BooleanProperty(False)
     blocked = BooleanProperty(False)
     element_type = StringProperty('song')
+
+    def __init__(self, **kwargs):
+        self.register_event_type('on_set_favorite')
+        super().__init__(**kwargs)
+
+    def on_set_favorite(self, widget):
+        pass
 
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
@@ -1136,6 +1150,7 @@ class ElementFavorite(Image):
                 touch.ungrab(self)
                 song_favorite = not self.song_favorite
                 self.player.favorite_set(self.song_id, favorite=song_favorite, element_type=self.element_type)
+                self.dispatch('on_set_favorite', widget=self)
 
 
 #Helper and specialized widgets

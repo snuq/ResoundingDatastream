@@ -2,6 +2,8 @@
 #   need to figure out how to receive wired headset media key on android
 #   bluetooth pause needs to be able to resume when app is not active
 #   if unable to set rating on playlist, will end up triggering long-press
+#   add sort by rating
+#   issues when loading with no internet connection - queue doesnt fallback to local, cached lists dont load right now
 
 from kivy.config import Config
 Config.set('graphics', 'maxfps', '30')
