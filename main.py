@@ -1,7 +1,6 @@
 #todo:
 #   need to figure out how to receive wired headset media key on android
 #   bluetooth pause needs to be able to resume when app is not active
-#   add sort by rating
 
 from kivy.config import Config
 Config.set('graphics', 'maxfps', '30')
