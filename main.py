@@ -761,6 +761,10 @@ class ResoundingDatastream(NormalApp):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        if desktop:
+            self.scale_amount = 22
+        else:
+            self.scale_amount = 15
         self.theme = SimpleTheme()
         self.theme.data_to_theme(theme_blank)
 
