@@ -1737,7 +1737,6 @@ class ResoundingDatastream(NormalApp):
         if platform == 'android':
             self.start_bluetooth_button()
         EventLoop.window.bind(on_keyboard=self.hook_keyboard)
-        self.set_window_size()
         self.screen_manager = self.root.ids.screenManager
         self.start_keyboard_navigation()
         self.setup_player()
