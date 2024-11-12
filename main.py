@@ -735,9 +735,10 @@ class ResoundingDatastream(NormalApp):
     queue_selected_only = BooleanProperty(True)
     queue_play_immediately = BooleanProperty(True)
     queue_mode = StringProperty('replace')
-    queue_mode_names = {'replace': 'Replace All', 'next': 'Add After Current', 'end': 'Add At End', 'start': 'Add At Start'}
+    queue_mode_names = {'next': 'Add After Current', 'end': 'Add At End', 'start': 'Add At Start'}
     last_playlist_name = StringProperty()
     last_playlist_id = StringProperty()
+    close_database = BooleanProperty(False)
 
     database_rescan_status = StringProperty()
     database_rescan_tracker = ObjectProperty(allownone=True)
@@ -808,12 +809,12 @@ class ResoundingDatastream(NormalApp):
         self.popup.open()
 
     def open_queue_popup(self):
-        queue = WidgetListQueue()
+        queue = WidgetListQueue(popup_mode=True)
         close_text = 'Close Queue'
         self.open_list_popup(queue, close_text)
 
     def open_database_popup(self):
-        queue = WidgetDatabase()
+        queue = WidgetDatabase(popup_mode=True)
         close_text = 'Close Database'
         self.open_list_popup(queue, close_text)
 
@@ -1253,6 +1254,7 @@ class ResoundingDatastream(NormalApp):
         self.config.set("Settings", "queue_selected_only", str(int(self.queue_selected_only)))
         self.config.set("Settings", "queue_play_immediately", str(int(self.queue_play_immediately)))
         self.config.set("Settings", "queue_mode", self.queue_mode)
+        self.config.set("Settings", "close_database", self.close_database)
         self.config.set("Settings", "sort_mode_song", self.sort_mode_song)
         self.config.set("Settings", "sort_mode_artist", self.sort_mode_artist)
         self.config.set("Settings", "sort_mode_other", self.sort_mode_other)
@@ -1279,6 +1281,7 @@ class ResoundingDatastream(NormalApp):
         self.color_theme = self.config.get('Settings', 'color_theme')
         self.speak_screen = self.config.getboolean("Settings", "speak_screen")
         self.speak_setting = self.config.getboolean("Settings", "speak_setting")
+        self.close_database = self.config.getboolean("Settings", "close_database")
         self.queue_max_amount = self.config.getint("Settings", "queue_max_amount")
         self.queue_selected_only = self.config.getboolean("Settings", "queue_selected_only")
         self.queue_play_immediately = self.config.getboolean("Settings", "queue_play_immediately")
@@ -1519,6 +1522,7 @@ class ResoundingDatastream(NormalApp):
                 'play_mode': 'in order',
                 'current_screen_name': '',
                 'autoplay': 0,
+                'close_database': 1,
                 'queue_max_amount': 100,
                 'queue_selected_only': 1,
                 'queue_mode': 'replace',
@@ -1701,6 +1705,13 @@ class ResoundingDatastream(NormalApp):
             "desc": "Number of songs to load at once when generating random playlists",
             "section": "Settings",
             "key": "random_size"
+        })
+        settingspanel.append({
+            "type": "bool",
+            "title": "Auto-Close Database",
+            "desc": "Close database popup or return to first screen after a Queue operation",
+            "section": "Settings",
+            "key": "close_database"
         })
         settings.add_json_panel('Snu Music Player Settings', self.config, data=json.dumps(settingspanel))
 

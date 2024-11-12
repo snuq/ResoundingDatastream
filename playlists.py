@@ -3,6 +3,7 @@ import time
 import random
 from operator import itemgetter
 from threading import Thread
+from xmlrpc.client import Boolean
 
 from kivy.uix.behaviors import DragBehavior
 from kivy.clock import mainthread, Clock
@@ -67,14 +68,13 @@ Builder.load_string("""
 <AddToDropDown>:
     auto_width: False
     size_hint_x: 1
+    WideButton:
+        text: "Replace Queue"
+        on_release: root.queue_replace()
     Holder:
         WideMenuStarter:
             text: app.queue_mode_names[app.queue_mode]
             on_release: root.open_queue_mode_menu(self)
-        NormalToggle:
-            text: "Play Now"
-            state: 'down' if app.queue_play_immediately else 'normal'
-            on_release: app.queue_play_immediately = self.state == 'down'
         NormalButton:
             menu: True
             text: "Add Queue"
@@ -87,6 +87,15 @@ Builder.load_string("""
             menu: True
             text: "Add Playlist"
             on_release: root.playlist_add()
+    SmallSpacer:
+    WideToggle:
+        text: "Play On Queue"
+        state: 'down' if app.queue_play_immediately else 'normal'
+        on_release: app.queue_play_immediately = self.state == 'down'
+    WideToggle:
+        text: 'Only Add Selected' if app.queue_selected_only else 'Add All Songs'
+        state: 'down' if app.queue_selected_only else 'normal'
+        on_release: app.queue_selected_only = self.state == 'down'
     Holder:
         ShortLabel:
             text: "Max Songs To Add: "
@@ -97,10 +106,6 @@ Builder.load_string("""
             text: str(app.queue_max_amount) if app.queue_max_amount > 0 else ''
             size_hint_x: 1
             on_text: app.queue_max_amount = int(self.text) if self.text else 0
-    WideToggle:
-        text: 'Only Add Selected' if app.queue_selected_only else 'Add All Songs'
-        state: 'down' if app.queue_selected_only else 'normal'
-        on_release: app.queue_selected_only = self.state == 'down'
 
 <AddToPlaylistDropDown>:
     auto_width: False
@@ -929,6 +934,10 @@ class AddToDropDown(NormalDropDown):
         queue_mode = app.queue_mode
         self.owner.queue(queue_mode)
 
+    def queue_replace(self):
+        self.dismiss()
+        self.owner.queue('replace')
+
     def playlist_add(self):
         self.dismiss()
         app = App.get_running_app()
@@ -1160,6 +1169,7 @@ class ArtistPlaylistElement(PlaylistElement):
 
 
 class WidgetListBrowse(ElementWidget):
+    popup_mode = BooleanProperty(False)
     scale = NumericProperty(1)
     blocked = BooleanProperty(False)
 
@@ -1469,7 +1479,13 @@ class WidgetDatabase(WidgetListBrowse):
         self.sort_database()
 
     def queue(self, mode):
-        App.get_running_app().add_blocking_thread('Queue', self.queue_process, (mode, ))
+        app = App.get_running_app()
+        app.add_blocking_thread('Queue', self.queue_process, (mode, ))
+        if app.close_database:
+            if self.popup_mode:
+                app.dismiss_popup()
+            else:
+                app.screen_manager.go_first()
 
     def get_songs(self, timeout):
         app = App.get_running_app()

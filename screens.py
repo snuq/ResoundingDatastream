@@ -438,6 +438,13 @@ class ScreenManagerBase(ScreenManager):
         super().__init__(**kwargs)
         self.transition = SlideTransition(duration=0)
 
+    def go_first(self):
+        first_screen = self.screens[0].name
+        if first_screen != self.current:
+            self.transition = SlideTransition(direction='up')
+            self.current = first_screen
+        return self.current
+
     def go_next(self):
         next_screen = self.next()
         if next_screen != self.current:
