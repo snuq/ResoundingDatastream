@@ -15,7 +15,7 @@ from kivy.uix.behaviors import ButtonBehavior
 from snu.label import TickerLabel, NormalLabel, ShortLabel
 from snu.button import WideButton, WideToggle, NormalDropDown, MenuButton, WideMenuStarter
 from snu.smoothsetting import SmoothSetting
-from basicscroller import ScrollBarY
+from snu.scrollview import ScrollBarY
 
 from kivy.lang.builder import Builder
 Builder.load_string("""
@@ -649,52 +649,6 @@ class CustomScrollbar(ScrollBarY):
     bar_width = NumericProperty()
     show_selected_point = BooleanProperty(False)
     selected_point = NumericProperty(0)
-
-    def _get_vbar(self):
-        if self.height > 0:
-            min_height = self.width / self.height  #prevent scroller size from being too small
-        else:
-            min_height = 0
-        vh = self.viewport_size[1]
-        h = self.scroller_size[1]
-        if vh < h or vh == 0:
-            return 0, 1.
-        ph = max(min_height, h / float(vh))
-        sy = min(1.0, max(0.0, self.scroll))
-        py = (1. - ph) * sy
-        return (py, ph)
-    vbar = AliasProperty(_get_vbar, bind=('scroller_size', 'scroll', 'viewport_size', 'height'), cache=True)
-
-    def in_vbar(self, pos_y):
-        local_y = pos_y - self.y
-        local_per = local_y / self.height
-        vbar = self.vbar
-        vbar_top = vbar[0] + vbar[1]
-        vbar_bottom = vbar[0]
-        half_vbar_height = vbar[1] / 2
-        if local_per > vbar_top:
-            return local_per - vbar_top + half_vbar_height
-        elif local_per < vbar_bottom:
-            return local_per - vbar_bottom - half_vbar_height
-        else:  #vbar_top > local_per > vbar_bottom:
-            return 0
-
-    def on_touch_down(self, touch):
-        if not self.disabled and self.collide_point(*touch.pos):
-            position = self.in_vbar(touch.pos[1])
-            self.scroller.scroll_y += position
-            touch.grab(self)
-            if 'button' in touch.profile and touch.button.startswith('scroll'):
-                btn = touch.button
-                scroll_direction = ''
-                if btn in ('scrollup', 'scrollright'):
-                    scroll_direction = 'up'
-                elif btn in ('scrolldown', 'scrollleft'):
-                    scroll_direction = 'down'
-                return self.wheel_scroll(scroll_direction)
-
-            self.do_touch_scroll(touch)
-            return True
 
 
 class AlphabetSelect(SmoothSetting):
