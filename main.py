@@ -743,7 +743,7 @@ class ResoundingDatastream(NormalApp):
     queue_max_amount = NumericProperty(100)
     queue_selected_only = BooleanProperty(True)
     queue_play_immediately = BooleanProperty(True)
-    queue_mode = StringProperty('replace')
+    queue_mode = StringProperty('end')
     queue_mode_names = {'next': 'Add After Current', 'end': 'Add At End', 'start': 'Add At Start'}
     last_playlist_name = StringProperty()
     last_playlist_id = StringProperty()
@@ -1304,7 +1304,7 @@ class ResoundingDatastream(NormalApp):
         if queue_mode in self.queue_mode_names.keys():
             self.queue_mode = queue_mode
         else:
-            self.queue_mode = 'replace'
+            self.queue_mode = 'end'
         self.sort_mode_song = self.config.get('Settings', 'sort_mode_song')
         self.sort_mode_artist = self.config.get('Settings', 'sort_mode_artist')
         self.sort_mode_other = self.config.get('Settings', 'sort_mode_other')
