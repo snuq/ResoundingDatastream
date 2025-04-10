@@ -1,5 +1,4 @@
 #todo:
-#   when adding to playlist - start on random song if in shuffle mode
 #   need to figure out how to receive wired headset media key on android
 #   needs to announce playing song title/artist to android (so it shows on watch)
 #   add option to shuffle folders/playlists when switching

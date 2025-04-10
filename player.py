@@ -408,7 +408,8 @@ class Player(EventDispatcher):
             self.queue_index = set_index
             if self.song_queue:
                 self.song_queue.set_index(self.queue_index)
-
+        if mode == 'replace' and self.play_mode == 'shuffle':
+            self.next()
         self.queue_type = queue_type
         self.queue_id = queue_id
         self.play_queue()
