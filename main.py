@@ -1,5 +1,8 @@
 #todo:
+#   when adding to playlist - start on random song if in shuffle mode
 #   need to figure out how to receive wired headset media key on android
+#   needs to announce playing song title/artist to android (so it shows on watch)
+#   add option to shuffle folders/playlists when switching
 #   bluetooth pause needs to be able to resume when app is not active
 
 from kivy.config import Config
@@ -45,6 +48,12 @@ if platform in ['win', 'linux', 'macosx', 'unknown']:
     Config.set('input', 'mouse', 'mouse,disable_multitouch')
 else:
     desktop = False
+if platform == 'linux':
+    #Linux has some weirdness with the touchpad by default... remove it
+    options = Config.options('input')
+    for option in options:
+        if Config.get('input', option) == 'probesysfs':
+            Config.remove_option('input', option)
 if platform == 'android':
     from android.runnable import run_on_ui_thread
     from jnius import autoclass, PythonJavaClass, java_method
@@ -842,6 +851,8 @@ class ResoundingDatastream(NormalApp):
                 self.message("Cache directory is not valid, using default")
             else:
                 return False, self.cache_location
+        if not os.path.isdir(default_cache):
+            os.makedirs(default_cache)
         return True, default_cache
 
     def update_cache_info(self):
@@ -940,8 +951,10 @@ class ResoundingDatastream(NormalApp):
         start_time = time.time()
         is_default, cache_folder = self.get_cache_folder()
         files = os.listdir(cache_folder)  #this is actually a bit faster than os.walk
-        files.remove('cache_info')
-        files.remove('lists')
+        if 'cache_info' in files:
+            files.remove('cache_info')
+        if 'lists' in files:
+            files.remove('lists')
         for file in files:
             fullpath = os.path.join(cache_folder, file)
             modified_date = None
