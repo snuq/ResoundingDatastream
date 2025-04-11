@@ -8,7 +8,7 @@ from .songqueue import queue_next
 
 
 class SongQueueAndroid:
-    #class that looks like SongQueue to the player, but actually sends/receives data from a service
+    #class that looks like SongQueue to the player, but actually sends/receives data from a service, does not play anything itself
     on_song_position_function = None
     on_queue_index_function = None
     on_next_queue_index_function = None

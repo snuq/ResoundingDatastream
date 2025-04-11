@@ -132,6 +132,8 @@ class Player(EventDispatcher):
 
     def set_playing(self, playing):
         self.playing = playing
+        app = App.get_running_app()
+        app.update_playback_state()
 
     @mainthread
     def set_queue_index(self, index):
@@ -195,6 +197,8 @@ class Player(EventDispatcher):
     @mainthread
     def set_song_position(self, pos):
         self.song_position = pos
+        app = App.get_running_app()
+        app.update_playback_time()
 
     def list_queue(self):
         queue = []
@@ -377,6 +381,8 @@ class Player(EventDispatcher):
 
         if not self.song_id:
             self.stop()
+        app = App.get_running_app()
+        app.update_metadata()
 
     def queue_set(self, queue, queue_type, queue_id, current_song=None, mode='replace', set_index=0):
         #current_song is the index of the currently playing song, if set, will update index without changing playback

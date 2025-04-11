@@ -1,6 +1,6 @@
 #todo:
 #   need to figure out how to receive wired headset media key on android
-#   needs to announce playing song title/artist to android (so it shows on watch)
+#   needs to announce playing song title/artist to android - partially implemented, does not auto-update
 #   add option to shuffle folders/playlists when switching
 #   bluetooth pause needs to be able to resume when app is not active
 
@@ -791,6 +791,32 @@ class ResoundingDatastream(NormalApp):
         self.session_callback.receive_next = self.bt_next
         self.session_callback.receive_previous = self.bt_previous
         self.session = start_media_session(activity, self.session_callback)
+        self.update_playback_state()
+
+    def update_playback_time(self):
+        self.update_playback_state()
+
+    def update_playback_state(self):
+        if platform == 'android':
+            from bluetoothcontroller import create_playback_state
+            playback_state = create_playback_state(False, self.player.song_position)
+            self.session.setPlaybackState(playback_state)
+            playback_state = create_playback_state(self.player.playing, self.player.song_position)
+            self.session.setPlaybackState(playback_state)
+
+    def update_metadata(self):
+        if platform == 'android':
+            index = self.player.queue_index
+            full_queue = self.player.queue
+            song = full_queue[index]
+            song_title = song['title']
+            song_artist = song['artist']
+            song_album = song['album']
+            song_length = song['duration'] * 1000
+            metadataclass = autoclass('android.media.MediaMetadata')
+            MediaMetaDataBuilder = autoclass('android.media.MediaMetadata$Builder')
+            metadata = MediaMetaDataBuilder().putLong(metadataclass.METADATA_KEY_DURATION, song_length).putString(metadataclass.METADATA_KEY_ALBUM, song_album).putString(metadataclass.METADATA_KEY_TITLE, song_title).putString(metadataclass.METADATA_KEY_ARTIST, song_artist).putString(metadataclass.METADATA_KEY_DISPLAY_TITLE, song_title).build()
+            self.session.setMetadata(metadata)
 
     def bt_play_toggle(self, *_):
         self.player.song_queue.play_toggle()

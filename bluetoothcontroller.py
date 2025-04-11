@@ -58,25 +58,38 @@ def run_function_on_android_thread(function, *args, **kwargs):
     handler.post(Runnable(function, read_thread, *args, **kwargs))
 
 
+def create_playback_state(playing, time):
+    PlaybackState = autoclass('android.media.session.PlaybackState')
+    PlaybackStateBuilder = autoclass('android.media.session.PlaybackState$Builder')
+    playback_state = PlaybackStateBuilder()
+    playback_state.setActions(PlaybackState.ACTION_PLAY + PlaybackState.ACTION_STOP + PlaybackState.ACTION_PAUSE + PlaybackState.ACTION_PLAY_PAUSE + PlaybackState.ACTION_SKIP_TO_NEXT + PlaybackState.ACTION_SKIP_TO_PREVIOUS + PlaybackState.ACTION_REWIND + PlaybackState.ACTION_FAST_FORWARD)
+    if playing:
+        is_playing = PlaybackState.STATE_PLAYING
+        playback_speed = 1.0
+    else:
+        is_playing = PlaybackState.STATE_STOPPED
+        playback_speed = 0
+    playback_state.setState(is_playing, time * 1000, playback_speed)
+    playback_state = playback_state.build()
+    return playback_state
+
+
 def start_media_session(activity, main_callback=None):
     if main_callback is None:
         main_callback = CallbackWrapper()
 
     #set up media session and required elements to be able to receive media button events
     MediaSession = autoclass('android.media.session.MediaSession')
-    session = MediaSession(activity, "MediaButtonsTest")
+    session = MediaSession(activity, "ResoundingDatastream")
     CustomMediaSessionCallback = autoclass('org.kivy.CustomMediaCallback')
     callback = CustomMediaSessionCallback(main_callback)
     session.setCallback(callback)
 
     #set up playback state to receive media buttons
-    PlaybackState = autoclass('android.media.session.PlaybackState')
-    PlaybackStateBuilder = autoclass('android.media.session.PlaybackState$Builder')
-    playback_state = PlaybackStateBuilder()
-    playback_state.setActions(PlaybackState.ACTION_PLAY + PlaybackState.ACTION_STOP + PlaybackState.ACTION_PAUSE + PlaybackState.ACTION_PLAY_PAUSE + PlaybackState.ACTION_SKIP_TO_NEXT + PlaybackState.ACTION_SKIP_TO_PREVIOUS + PlaybackState.ACTION_REWIND + PlaybackState.ACTION_FAST_FORWARD)
-    playback_state.setState(PlaybackState.STATE_PLAYING, 0, 1.0)
-    playback_state = playback_state.build()
+    playback_state = create_playback_state(True, 0)
     session.setPlaybackState(playback_state)
+
+    #session.setSessionActivity()
 
     session.setActive(True)
     return session
