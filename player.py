@@ -218,10 +218,10 @@ class Player(EventDispatcher):
             self.queue_history.append([queue, self.queue_index, self.song_position, self.queue_type, self.queue_id])
             self.queue_history = self.queue_history[-10:]
 
-    def queue_load(self, play=False):
-        App.get_running_app().add_blocking_thread('Load Remote Queue', self.queue_load_process, (play, ))
+    def queue_load(self, play=False, keep_queue_type=False):
+        App.get_running_app().add_blocking_thread('Load Remote Queue', self.queue_load_process, (play, keep_queue_type, ))
 
-    def queue_load_process(self, play, timeout):
+    def queue_load_process(self, play, keep_queue_type, timeout):
         app = App.get_running_app()
         was_playing = self.playing
         self.stop()
@@ -230,7 +230,13 @@ class Player(EventDispatcher):
             return False
         if songs:
             current_index = self.get_key_index(current_id, songs)
-            self.queue_set(songs, 'playlist', 'none', current_song=current_index)
+            if keep_queue_type:
+                queue_type = self.queue_type
+                queue_id = self.queue_id
+            else:
+                queue_type = 'playlist'
+                queue_id = 'none'
+            self.queue_set(songs, queue_type, queue_id, current_song=current_index)
             self.set_song_position(position)
             self.queue_changed = True
             app.message('Loaded remote queue')
@@ -255,11 +261,17 @@ class Player(EventDispatcher):
         data = [self.queue.copy(), self.queue_index, self.song_position]
         return data
 
-    def queue_load_local(self, data, play=False, background=False):
+    def queue_load_local(self, data, play=False, background=False, keep_queue_type=False):
         app = App.get_running_app()
         was_playing = self.playing
         songs, queue_index, song_position = data
-        self.queue_set(songs, 'playlist', 'none', current_song=queue_index)
+        if keep_queue_type:
+            queue_type = self.queue_type
+            queue_id = self.queue_id
+        else:
+            queue_type = 'playlist'
+            queue_id = 'none'
+        self.queue_set(songs, queue_type, queue_id, current_song=queue_index)
         if not background:
             app.message('Loaded local queue')
             if play or was_playing:
@@ -315,7 +327,7 @@ class Player(EventDispatcher):
         self.next_song_artist = "Next Song Artist"
         self.next_song_album = "Next Song Album"
         self.queue_id = "a"
-        self.queue_type = 'Random'
+        self.queue_type = 'random'
         self.set_song_position(0)
         self.queue = []
         for index in range(1, 11):
@@ -381,6 +393,8 @@ class Player(EventDispatcher):
     def queue_set(self, queue, queue_type, queue_id, current_song=None, mode='replace', set_index=0):
         #current_song is the index of the currently playing song, if set, will update index without changing playback
         #mode can be: replace, prepend/start, append/end, next/insert (or any other)
+        was_playing = self.playing
+        self.stop()
         if not queue:
             if mode != 'replace':
                 return
@@ -413,6 +427,8 @@ class Player(EventDispatcher):
         self.queue_type = queue_type
         self.queue_id = queue_id
         self.play_queue()
+        if was_playing:
+            self.play()
 
     def get_current_queue_song(self):
         new_index, song = self.get_queue_song(self.loop_list_index(self.queue_index, self.queue))
@@ -972,6 +988,8 @@ class Player(EventDispatcher):
             if not playlists:
                 return True
             playlists.insert(0, {'id': 'none', 'name': 'queue', 'songCount': 0})  #insert dummy playlist to take the place of the queue
+            if self.play_mode == 'shuffle':
+                random.shuffle(playlists)
             new_index = self.get_key_index(self.queue_id, playlists, allownone=True)
             if new_index is None:  #playlist not found, just load queue instead
                 new_index = 0
@@ -996,6 +1014,9 @@ class Player(EventDispatcher):
                 return False
             if not artists:
                 return True
+            artists.sort(key=lambda x: x['name'])
+            if self.play_mode == 'shuffle':
+                random.shuffle(artists)
             new_index = self.get_key_index(self.queue_id, artists, allownone=True)
             if new_index is None:
                 new_index = 0
@@ -1016,6 +1037,8 @@ class Player(EventDispatcher):
             if not albums:
                 return True
             albums = sorted(albums, key=lambda album: album['artist'])
+            if self.play_mode == 'shuffle':
+                random.shuffle(albums)
             new_index = self.get_key_index(self.queue_id, albums, allownone=True)
             if new_index is None:
                 new_index = 0
@@ -1036,6 +1059,8 @@ class Player(EventDispatcher):
             if not genres:
                 return True
             genres = sorted(genres, key=lambda genre: genre['value'])
+            if self.play_mode == 'shuffle':
+                random.shuffle(genres)
             new_index = self.get_key_index(self.queue_id, genres, key='value', allownone=True)
             if new_index is None:
                 new_index = 0

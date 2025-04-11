@@ -1377,7 +1377,7 @@ class ResoundingDatastream(NormalApp):
         queue_file = os.path.join(conf_dir, filename+'.json')
         return queue_file
 
-    def load_queue_local(self, queue_filename=None, play=True, background=False):
+    def load_queue_local(self, queue_filename=None, play=True, background=False, keep_queue_type=False):
         try:
             if queue_filename is None:
                 queue_filename = self.get_local_queue_file()
@@ -1386,7 +1386,7 @@ class ResoundingDatastream(NormalApp):
             with open(queue_filename) as file:
                 data = json.load(file)
             if data:
-                self.player.queue_load_local(data, play=play, background=background)
+                self.player.queue_load_local(data, play=play, background=background, keep_queue_type=keep_queue_type)
         except Exception as e:
             if not background:
                 self.message("Unable to load local queue.")
@@ -1462,11 +1462,11 @@ class ResoundingDatastream(NormalApp):
     def database_created(self):
         self.close_not_connected_popup()
         if self.autoload_queue:
-            self.load_queue_local(None, background=True)
-            self.player.queue_load(self.autoplay)
+            self.load_queue_local(None, background=True, keep_queue_type=True)
+            self.player.queue_load(self.autoplay, keep_queue_type=True)
         else:
             self.player.database.get_ping()
-            self.load_queue_local(self.autoplay)
+            self.load_queue_local(self.autoplay, keep_queue_type=True)
 
     def build(self):
         """Called when app is initialized, kv files are not loaded, but other data is"""
