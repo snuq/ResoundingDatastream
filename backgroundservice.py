@@ -76,7 +76,7 @@ def receive_set_queue(message):
     ratings = rating_string.split(' | ')
     ratings = [int(rating) for rating in ratings]
     log('receive set queue', len(queue))
-    function_queue.append([song_queue.set_queue, [queue, ratings], None])
+    function_queue.append([song_queue.set_queue, [queue, ratings, []], None])
 
 
 def receive_add_queue(message):

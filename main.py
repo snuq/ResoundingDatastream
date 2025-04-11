@@ -54,7 +54,6 @@ if platform == 'linux':
         if Config.get('input', option) == 'probesysfs':
             Config.remove_option('input', option)
 if platform == 'android':
-    from android.runnable import run_on_ui_thread
     from jnius import autoclass, PythonJavaClass, java_method
     from android.permissions import request_permission, check_permission, Permission
     can_internet = check_permission(Permission.INTERNET)
@@ -88,8 +87,6 @@ if platform == 'android':
         def run(self):
             self.func(*self.args, **self.kwargs)
             self.read_thread.quit()
-else:
-    from kivy.clock import mainthread as run_on_ui_thread
 
 
 KV = """
@@ -779,56 +776,6 @@ class ResoundingDatastream(NormalApp):
 
     def run_test(self):
         self.message(str(self.player.song_queue.verify_song_queue()))
-
-    @run_on_ui_thread
-    def start_bluetooth_button(self, *_):
-        from bluetoothcontroller import CallbackWrapper, start_media_session
-        PythonActivity = autoclass('org.kivy.android.PythonActivity')
-        activity = PythonActivity.mActivity
-        self.session_callback = CallbackWrapper()
-        self.session_callback.receive_play_toggle = self.bt_play_toggle
-        self.session_callback.receive_stop = self.bt_stop
-        self.session_callback.receive_next = self.bt_next
-        self.session_callback.receive_previous = self.bt_previous
-        self.session = start_media_session(activity, self.session_callback)
-        self.update_playback_state()
-
-    def update_playback_time(self):
-        self.update_playback_state()
-
-    def update_playback_state(self):
-        if platform == 'android':
-            from bluetoothcontroller import create_playback_state
-            playback_state = create_playback_state(False, self.player.song_position)
-            self.session.setPlaybackState(playback_state)
-            playback_state = create_playback_state(self.player.playing, self.player.song_position)
-            self.session.setPlaybackState(playback_state)
-
-    def update_metadata(self):
-        if platform == 'android':
-            index = self.player.queue_index
-            full_queue = self.player.queue
-            song = full_queue[index]
-            song_title = song['title']
-            song_artist = song['artist']
-            song_album = song['album']
-            song_length = song['duration'] * 1000
-            metadataclass = autoclass('android.media.MediaMetadata')
-            MediaMetaDataBuilder = autoclass('android.media.MediaMetadata$Builder')
-            metadata = MediaMetaDataBuilder().putLong(metadataclass.METADATA_KEY_DURATION, song_length).putString(metadataclass.METADATA_KEY_ALBUM, song_album).putString(metadataclass.METADATA_KEY_TITLE, song_title).putString(metadataclass.METADATA_KEY_ARTIST, song_artist).putString(metadataclass.METADATA_KEY_DISPLAY_TITLE, song_title).build()
-            self.session.setMetadata(metadata)
-
-    def bt_play_toggle(self, *_):
-        self.player.song_queue.play_toggle()
-
-    def bt_stop(self, *_):
-        self.player.song_queue.stop()
-
-    def bt_next(self, *_):
-        self.player.song_queue.next()
-
-    def bt_previous(self, *_):
-        self.player.song_queue.previous()
 
     def open_list_popup(self, queue, close_text):
         self.dismiss_popup()
@@ -1783,8 +1730,6 @@ class ResoundingDatastream(NormalApp):
     def on_start(self):
         """Called when the app is started, after kv files are loaded"""
 
-        if platform == 'android':
-            self.start_bluetooth_button()
         EventLoop.window.bind(on_keyboard=self.hook_keyboard)
         self.screen_manager = self.root.ids.screenManager
         self.start_keyboard_navigation()

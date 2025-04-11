@@ -93,6 +93,7 @@ class SongQueue:
 
     queue = []
     queue_ratings = []
+    full_queue = []
     queue_index = 0
     next_queue_index = 0
     skiponestar = False
@@ -276,9 +277,10 @@ class SongQueue:
     #Functions to set data in player
     def set_queue(self, data):
         self.cache_clear()
-        queue, ratings = data
-        self.queue = queue
+        urls, ratings, full_queue = data
+        self.queue = urls
         self.queue_ratings = ratings
+        self.full_queue = full_queue
         self.reset_random_history()
 
     def add_queue(self, data):

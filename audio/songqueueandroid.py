@@ -1,10 +1,105 @@
 import time
 from kivy.app import App
 from kivy.clock import mainthread
-from jnius import autoclass
+from jnius import autoclass, PythonJavaClass, java_method
 from oscpy.server import OSCThreadServer
 from oscpy.client import OSCClient
 from .songqueue import queue_next
+from android.runnable import run_on_ui_thread
+
+
+class CallbackWrapper(PythonJavaClass):
+    __javacontext__ = "app"
+    __javainterfaces__ = ["org/kivy/CallbackWrapper"]
+
+    receive_play_toggle = None
+    receive_stop = None
+    receive_next = None
+    receive_previous = None
+    receive_forward = None
+    receive_backward = None
+
+    @java_method("(Ljava/lang/String;)V")
+    def button_pressed(self, button):
+        #button may be one of: play, pause, stop, next, previous, forward, backward
+        if button in ['play', 'pause'] and self.receive_play_toggle:
+            self.receive_play_toggle()
+        elif button == 'stop' and self.receive_stop:
+            self.receive_stop()
+        elif button == 'next' and self.receive_next:
+            self.receive_next()
+        elif button == 'previous' and self.receive_previous:
+            self.receive_previous()
+        elif button == 'forward' and self.receive_forward:
+            self.receive_forward()
+
+
+class Runnable(PythonJavaClass):
+    """Wrapper around Java Runnable class. This class can be used to schedule a
+    call of a Python function into the PythonActivity thread.
+    """
+
+    __javainterfaces__ = ["java/lang/Runnable"]
+    __runnables__ = []
+
+    def __init__(self, func, read_thread, *args, **kwargs):
+        super().__init__()
+        self.read_thread = read_thread
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+
+    @java_method("()V")
+    def run(self):
+        self.func(*self.args, **self.kwargs)
+        self.read_thread.quit()
+
+
+def run_function_on_android_thread(function, *args, **kwargs):
+    HandlerThread = autoclass("android.os.HandlerThread")
+    Handler = autoclass("android.os.Handler")
+    read_thread = HandlerThread("")
+    read_thread.start()
+    looper = read_thread.getLooper()
+    handler = Handler(looper)
+    handler.post(Runnable(function, read_thread, *args, **kwargs))
+
+
+def create_playback_state(playing, time):
+    PlaybackState = autoclass('android.media.session.PlaybackState')
+    PlaybackStateBuilder = autoclass('android.media.session.PlaybackState$Builder')
+    playback_state = PlaybackStateBuilder()
+    playback_state.setActions(PlaybackState.ACTION_PLAY + PlaybackState.ACTION_STOP + PlaybackState.ACTION_PAUSE + PlaybackState.ACTION_PLAY_PAUSE + PlaybackState.ACTION_SKIP_TO_NEXT + PlaybackState.ACTION_SKIP_TO_PREVIOUS + PlaybackState.ACTION_REWIND + PlaybackState.ACTION_FAST_FORWARD)
+    if playing:
+        is_playing = PlaybackState.STATE_PLAYING
+        playback_speed = 1.0
+    else:
+        is_playing = PlaybackState.STATE_STOPPED
+        playback_speed = 0
+    playback_state.setState(is_playing, time * 1000, playback_speed)
+    playback_state = playback_state.build()
+    return playback_state
+
+
+def start_media_session(activity, main_callback=None):
+    if main_callback is None:
+        main_callback = CallbackWrapper()
+
+    #set up media session and required elements to be able to receive media button events
+    MediaSession = autoclass('android.media.session.MediaSession')
+    session = MediaSession(activity, "ResoundingDatastream")
+    CustomMediaSessionCallback = autoclass('org.kivy.CustomMediaCallback')
+    callback = CustomMediaSessionCallback(main_callback)
+    session.setCallback(callback)
+
+    #set up playback state to receive media buttons
+    playback_state = create_playback_state(True, 0)
+    session.setPlaybackState(playback_state)
+
+    #session.setSessionActivity()
+
+    session.setActive(True)
+    return session
 
 
 class SongQueueAndroid:
@@ -25,6 +120,7 @@ class SongQueueAndroid:
 
     queue = []
     queue_ratings = []
+    full_queue = []
     queue_index = 0
     next_queue_index = 0
     next_queue_index_backup = 0
@@ -34,7 +130,54 @@ class SongQueueAndroid:
     song_position = 0
     got_ping = False
 
+    session = None
+    session_callback = None
+
+    def bt_play_toggle(self, *_):
+        self.play_toggle()
+
+    def bt_stop(self, *_):
+        self.stop()
+
+    def bt_next(self, *_):
+        self.next()
+
+    def bt_previous(self, *_):
+        self.previous()
+
+    @run_on_ui_thread
+    def start_bluetooth_button(self, *_):
+        PythonActivity = autoclass('org.kivy.android.PythonActivity')
+        activity = PythonActivity.mActivity
+        self.session_callback = CallbackWrapper()
+        self.session_callback.receive_play_toggle = self.bt_play_toggle
+        self.session_callback.receive_stop = self.bt_stop
+        self.session_callback.receive_next = self.bt_next
+        self.session_callback.receive_previous = self.bt_previous
+        self.session = start_media_session(activity, self.session_callback)
+
+    def update_playback_time(self):
+        self.update_playback_state()
+
+    def update_playback_state(self):
+        playback_state = create_playback_state(False, self.song_position)
+        self.session.setPlaybackState(playback_state)
+        playback_state = create_playback_state(self.playing, self.song_position)
+        self.session.setPlaybackState(playback_state)
+
+    def update_metadata(self):
+        song = self.full_queue[self.queue_index]
+        song_title = song['title']
+        song_artist = song['artist']
+        song_album = song['album']
+        song_length = song['duration'] * 1000
+        metadataclass = autoclass('android.media.MediaMetadata')
+        MediaMetaDataBuilder = autoclass('android.media.MediaMetadata$Builder')
+        metadata = MediaMetaDataBuilder().putLong(metadataclass.METADATA_KEY_DURATION, song_length).putString(metadataclass.METADATA_KEY_ALBUM, song_album).putString(metadataclass.METADATA_KEY_TITLE, song_title).putString(metadataclass.METADATA_KEY_ARTIST, song_artist).putString(metadataclass.METADATA_KEY_DISPLAY_TITLE, song_title).build()
+        self.session.setMetadata(metadata)
+
     def setup(self):
+        self.start_bluetooth_button()
         try:
             app = App.get_running_app()
             self.osc_client = OSCClient("localhost", app.osc_port + 1)
@@ -133,9 +276,10 @@ class SongQueueAndroid:
 
     #Functions to set data to player
     def set_queue(self, data):
-        queue, ratings = data
-        self.queue = queue
+        urls, ratings, full_queue = data
+        self.queue = urls
         self.queue_ratings = ratings
+        self.full_queue = full_queue
         self.send_queue()
         self.reset_random_history()
 
@@ -306,11 +450,13 @@ class SongQueueAndroid:
         self.song_position = float(song_position)
         if self.on_song_position_function:
             self.on_song_position_function(self.song_position)
+        self.update_playback_state()
 
     def on_queue_index(self, queue_index):
         self.queue_index = int(queue_index)
         if self.on_queue_index_function:
             self.on_queue_index_function(self.queue_index)
+        self.update_metadata()
 
     def on_next_queue_index(self, next_queue_index):
         self.next_queue_index = int(next_queue_index)
@@ -330,3 +476,6 @@ class SongQueueAndroid:
     def on_play(self, *_):
         if self.on_play_function:
             self.on_play_function()
+        self.update_metadata()
+        self.update_playback_state()
+
