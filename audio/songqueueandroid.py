@@ -55,16 +55,6 @@ class Runnable(PythonJavaClass):
         self.read_thread.quit()
 
 
-def run_function_on_android_thread(function, *args, **kwargs):
-    HandlerThread = autoclass("android.os.HandlerThread")
-    Handler = autoclass("android.os.Handler")
-    read_thread = HandlerThread("")
-    read_thread.start()
-    looper = read_thread.getLooper()
-    handler = Handler(looper)
-    handler.post(Runnable(function, read_thread, *args, **kwargs))
-
-
 def create_playback_state(playing, time):
     PlaybackState = autoclass('android.media.session.PlaybackState')
     PlaybackStateBuilder = autoclass('android.media.session.PlaybackState$Builder')
