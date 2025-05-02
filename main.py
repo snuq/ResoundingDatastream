@@ -808,7 +808,11 @@ class ResoundingDatastream(NormalApp):
             context = activity.getApplicationContext()
             cache_dirs = context.getExternalCacheDirs()
             for cache_dir in cache_dirs:
-                dir_string = str(cache_dir.toPath().toAbsolutePath().toString())
+                try:
+                    dir_string = str(cache_dir.toPath().toAbsolutePath().toString())
+                except:
+                    #above can break on older versions of java, use fallback
+                    dir_string = str(cache_dir.toString())
                 if 'emulated' in dir_string:
                     caches.append([dir_string, "Internal Storage"])
                 else:

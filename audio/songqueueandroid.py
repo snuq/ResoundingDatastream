@@ -150,12 +150,16 @@ class SongQueueAndroid:
         self.update_playback_state()
 
     def update_playback_state(self):
+        if not self.session:
+            return
         playback_state = create_playback_state(False, self.song_position)
         self.session.setPlaybackState(playback_state)
         playback_state = create_playback_state(self.playing, self.song_position)
         self.session.setPlaybackState(playback_state)
 
     def update_metadata(self):
+        if not self.session:
+            return
         song = self.full_queue[self.queue_index]
         song_title = song['title']
         song_artist = song['artist']
