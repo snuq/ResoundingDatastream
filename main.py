@@ -2,6 +2,9 @@
 #   need to figure out how to receive wired headset media key on android
 #   needs to announce playing song title/artist to android - partially implemented, does not auto-update
 #   add option to shuffle folders/playlists when switching
+#   bug: android 6 will not load queue
+#   add reload remote queue option in app menu
+#   add cache manager screen (cleans cached songs, displays songs(
 #   bluetooth pause needs to be able to resume when app is not active
 
 from kivy.config import Config

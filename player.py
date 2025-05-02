@@ -95,6 +95,8 @@ class Player(EventDispatcher):
                 self.song_queue.end()
         song_queue_setup = self.song_queue.setup()
         if not song_queue_setup[0]:
+            self.song_queue.close()
+            self.song_queue = None
             return song_queue_setup
         return database_created
 
@@ -384,8 +386,11 @@ class Player(EventDispatcher):
         self.song_album_id = song['albumId']
         self.song_artist_id = song['artistId']
         self.song_rating = song['userRating']
-        url = self.song_queue.get_url()
-        self.current_is_cached = not url.startswith('http')
+        if self.song_queue:
+            url = self.song_queue.get_url()
+            self.current_is_cached = not url.startswith('http')
+        else:
+            self.current_is_cached = False
 
         if not self.song_id:
             self.stop()
@@ -629,8 +634,9 @@ class Player(EventDispatcher):
             else:
                 self.stop()
                 self.queue_set(queue, queue_type, queue_id, current_song=index)
-                self.song_queue.set_index(index)
-                self.song_queue.set_position(position)
+                if self.song_queue:
+                    self.song_queue.set_index(index)
+                    self.song_queue.set_position(position)
                 if was_playing:
                     self.play()
 
@@ -666,7 +672,8 @@ class Player(EventDispatcher):
         self.queue, queue_index, moved_indexes = self.move_indexes(self.queue, indexes, moveby, self.queue_index)
         self.song_queue_set_queue()
         self.queue_index = queue_index
-        self.song_queue.update_index(queue_index)
+        if self.song_queue:
+            self.song_queue.update_index(queue_index)
         return moved_indexes
 
     def queue_remove_indexes(self, songindexes):
@@ -689,7 +696,8 @@ class Player(EventDispatcher):
         self.queue = queue
         self.song_queue_set_queue()
         self.queue_index = queue_index
-        self.song_queue.update_index(queue_index)
+        if self.song_queue:
+            self.song_queue.update_index(queue_index)
         if in_queue:
             if self.playing:
                 self.stop()
@@ -707,7 +715,8 @@ class Player(EventDispatcher):
         self.song_queue_set_queue()
         if self.queue_index > songindex:
             self.queue_index -= 1
-            self.song_queue.update_index(self.queue_index)
+            if self.song_queue:
+                self.song_queue.update_index(self.queue_index)
         elif self.queue_index == songindex:
             if self.playing:
                 self.stop()

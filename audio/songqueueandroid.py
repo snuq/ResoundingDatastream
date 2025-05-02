@@ -171,12 +171,24 @@ class SongQueueAndroid:
         self.session.setMetadata(metadata)
 
     def setup(self):
+        if self.osc_server:
+            self.close()
         self.start_bluetooth_button()
         try:
             app = App.get_running_app()
             self.osc_client = OSCClient("localhost", app.osc_port + 1)
             self.osc_server = OSCThreadServer(encoding="utf8")
-            self.osc_server.listen("localhost", port=app.osc_port, default=True)
+
+            #self.osc_server.listen("localhost", port=app.osc_port, default=True) #can cause OSError - error 98: Address already in use
+            import socket
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            addr = ("localhost", app.osc_port)
+            sock.bind(addr)
+
+            self.osc_server.sockets.append(sock)
+            self.osc_server.default_socket = sock
+            self.osc_server.bind_meta_routes(sock)
             self.osc_server.bind(b"/on_stop", self.stop_service)
             self.osc_server.bind(b"/on_song_position", self.on_song_position)
             self.osc_server.bind(b"/on_queue_index", self.on_queue_index)
@@ -194,10 +206,12 @@ class SongQueueAndroid:
     def close(self, service=False):
         if service:
             self.stop_service()
-            self.stop_service_support()
+        self.stop_service_support()
 
     def verify_song_queue(self):
         self.got_ping = False
+        if not self.osc_client:
+            return False
         self.osc_client.send_message(b"/ping", '')
         start_time = time.time()
         while not self.got_ping:
@@ -259,7 +273,9 @@ class SongQueueAndroid:
         if self.osc_server:
             self.osc_server.stop_all()  # Stop all sockets
             self.osc_server.terminate_server()  # Request the handler thread to stop looping
-            self.osc_server.join_server()
+            server_joined = False
+            while not server_joined:
+                server_joined = self.osc_server.join_server(timeout=0.1)
             self.osc_server = None
         if self.osc_client:
             self.osc_client = None
