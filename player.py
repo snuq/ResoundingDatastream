@@ -975,16 +975,42 @@ class Player(EventDispatcher):
             app.message("Queued " + str(len(songs)) + " songs from album: "+album_name)
         return True
 
-    def queue_same(self, next):
-        App.get_running_app().add_blocking_thread('Queue Same', self.queue_same_process, args=(next,))
+    def queue_same(self, mode='next'):
+        App.get_running_app().add_blocking_thread('Queue Same', self.queue_same_process, args=(mode,))
 
-    def queue_same_process(self, next, timeout):
+    def queue_same_process(self, mode, timeout):
         app = App.get_running_app()
         #use self.queue_type and self.queue_id to set a new queue
         #can be: random, playlist, artist, album, genre, rating, none
-        if next:
+
+        def random_omit(upper, omits):
+            indexes = list(range(0, upper))
+            omits = set(omits)
+            omits = [x for x in omits if x is not None]
+            for omit in reversed(sorted(omits)):
+                try:
+                    indexes.pop(omit)
+                except:
+                    pass
+            if indexes:
+                return random.choice(indexes)
+            else:
+                return 0
+
+        def get_new_index(items, current, advance_by):
+            if advance_by == 0:
+                return random_omit(len(items), [current])
+            elif current is None:
+                return 0
+            else:
+                return self.loop_list_index(current+advance_by, items)
+
+        if mode == 'next':
             advance = 1
             modifier_name = 'next'
+        elif mode == 'random':
+            advance = 0
+            modifier_name = 'random'
         else:
             advance = -1
             modifier_name = 'previous'
@@ -997,14 +1023,17 @@ class Player(EventDispatcher):
             if not playlists:
                 return True
             playlists.insert(0, {'id': 'none', 'name': 'queue', 'songCount': 0})  #insert dummy playlist to take the place of the queue
-            if self.play_mode == 'shuffle':
-                random.shuffle(playlists)
-            new_index = self.get_key_index(self.queue_id, playlists, allownone=True)
-            if new_index is None:  #playlist not found, just load queue instead
-                new_index = 0
-            else:  #playlist fond, load next/prev playlist
-                new_index = new_index + advance  #unrefined new index
-            new_index = self.loop_list_index(new_index, playlists)  #looped index
+            current_index = self.get_key_index(self.queue_id, playlists, allownone=True)
+            if current_index is None:
+                #playlist not found, assume queue is loaded
+                current_index = 0
+
+            if advance == 0:
+                #random index
+                new_index = random_omit(len(playlists), [0, current_index])
+            else:
+                new_index = current_index + advance  #unrefined new index
+                new_index = self.loop_list_index(new_index, playlists)  #looped index
             if new_index == 0:
                 self.queue_undo_store()
                 self.queue_load()
@@ -1024,14 +1053,8 @@ class Player(EventDispatcher):
             if not artists:
                 return True
             artists.sort(key=lambda x: x['name'])
-            if self.play_mode == 'shuffle':
-                random.shuffle(artists)
-            new_index = self.get_key_index(self.queue_id, artists, allownone=True)
-            if new_index is None:
-                new_index = 0
-            else:
-                new_index = new_index + advance
-            new_index = self.loop_list_index(new_index, artists)
+            current_index = self.get_key_index(self.queue_id, artists, allownone=True)
+            new_index = get_new_index(artists, current_index, advance)
             artistid = artists[new_index]['id']
             item_name = artists[new_index]['name']
             songs = self.database_get_song_list_artist(artistid, timeout=timeout)
@@ -1046,14 +1069,8 @@ class Player(EventDispatcher):
             if not albums:
                 return True
             albums = sorted(albums, key=lambda album: album['artist'])
-            if self.play_mode == 'shuffle':
-                random.shuffle(albums)
-            new_index = self.get_key_index(self.queue_id, albums, allownone=True)
-            if new_index is None:
-                new_index = 0
-            else:
-                new_index = new_index + advance
-            new_index = self.loop_list_index(new_index, albums)
+            current_index = self.get_key_index(self.queue_id, albums, allownone=True)
+            new_index = get_new_index(albums, current_index, advance)
             albumid = albums[new_index]['id']
             item_name = albums[new_index]['name']
             songs = self.database_get_song_list_album(albumid, timeout=timeout)
@@ -1068,14 +1085,8 @@ class Player(EventDispatcher):
             if not genres:
                 return True
             genres = sorted(genres, key=lambda genre: genre['value'])
-            if self.play_mode == 'shuffle':
-                random.shuffle(genres)
-            new_index = self.get_key_index(self.queue_id, genres, key='value', allownone=True)
-            if new_index is None:
-                new_index = 0
-            else:
-                new_index = new_index + advance
-            new_index = self.loop_list_index(new_index, genres)
+            current_index = self.get_key_index(self.queue_id, genres, key='value', allownone=True)
+            new_index = get_new_index(genres, current_index, advance)
             new_genre = genres[new_index]['value']
             item_name = new_genre
             songs = self.database_get_song_list_genre(genre=new_genre, timeout=timeout)
@@ -1087,15 +1098,14 @@ class Player(EventDispatcher):
             ratings = ['star', '5', '4', '3', '2', '1', '0']
             if self.queue_id not in ratings:
                 return True
-            new_index = ratings.index(self.queue_id)
-            new_index = new_index + advance
-            new_index = self.loop_list_index(new_index, ratings)
+            current_index = ratings.index(self.queue_id)
+            new_index = get_new_index(ratings, current_index, advance)
             new_rating = ratings[new_index]
             item_name = str(new_rating)
             if new_rating == 'star':
                 songs = self.database_get_song_list_favorite(timeout=timeout)
             else:
-                songs = []
+                songs = self.database_get_song_list_rating(rating=new_rating, timeout=timeout)
             if songs is None:
                 return False
             self.queue_undo_store()
@@ -1114,10 +1124,13 @@ class Player(EventDispatcher):
         return True
 
     def queue_same_next(self):
-        self.queue_same(next=True)
+        self.queue_same()
 
     def queue_same_previous(self):
-        self.queue_same(next=False)
+        self.queue_same(mode='previous')
+
+    def queue_same_random(self):
+        self.queue_same(mode='random')
 
     def playlist_remove_song(self, playlistid, index, timeout=None, message=True):
         if isinstance(index, type(1)):
@@ -1305,6 +1318,12 @@ class Player(EventDispatcher):
             app.add_cached_list('songs_favorites', "", songs)
         return songs
 
+    def database_get_song_list_rating(self, rating, timeout=None):
+        songs = self.database_get_search_song(query='', timeout=timeout)
+        rating_int = int(rating)
+        songs = [song for song in songs if song['userRating'] == rating_int]
+        return songs
+
     def database_get_album_list_favorite(self, timeout=None):
         app = App.get_running_app()
         songs = self.database.get_album_list_favorite(timeout=timeout)
@@ -1368,7 +1387,7 @@ class Player(EventDispatcher):
                 songs = app.get_cached_list('albums', "")
             else:
                 app.update_connection_status(True, "")
-                app.add_cached_list('albumus', "", songs)
+                app.add_cached_list('albums', "", songs)
         else:
             songs = self.database.get_full_list(self.database.get_search_album, query=query, timeout=timeout)
         return songs

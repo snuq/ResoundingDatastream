@@ -512,12 +512,16 @@ Builder.load_string("""
         on_release: root.player.queue_same_album()
         on_release: root.dismiss()
     MenuButton:
-        text: "Playlist Next Similar"
+        text: "Playlist Similar Next"
         on_release: root.player.queue_same_next()
         on_release: root.dismiss()
     MenuButton:
-        text: "Playlist Previous Similar"
+        text: "Playlist Similar Previous"
         on_release: root.player.queue_same_previous()
+        on_release: root.dismiss()
+    MenuButton:
+        text: "Playlist Similar Random"
+        on_release: root.player.queue_same_random()
         on_release: root.dismiss()
     SmallSpacer:
     MenuButton:
