@@ -1,7 +1,6 @@
 #todo:
 #   need to figure out how to receive wired headset media key on android
 #   needs to announce playing song title/artist to android - partially implemented, does not auto-update
-#   add option to shuffle folders/playlists when switching
 #   bug: android 6 will not load queue
 #   bluetooth pause needs to be able to resume when app is not active
 #   May have issues with foreground service in android 15+ - 6 hour time limit, needs a service type? "android:foregroundServiceType.mediaPlayback", need permission "FOREGROUND_SERVICE_MEDIA_PLAYBACK": https://developer.android.com/develop/background-work/services/fgs/service-types#media
