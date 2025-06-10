@@ -3,8 +3,8 @@
 #   needs to announce playing song title/artist to android - partially implemented, does not auto-update
 #   add option to shuffle folders/playlists when switching
 #   bug: android 6 will not load queue
-#   add reload remote queue option in app menu
 #   bluetooth pause needs to be able to resume when app is not active
+#   May have issues with foreground service in android 15+ - 6 hour time limit, needs a service type? "android:foregroundServiceType.mediaPlayback", need permission "FOREGROUND_SERVICE_MEDIA_PLAYBACK": https://developer.android.com/develop/background-work/services/fgs/service-types#media
 
 from kivy.config import Config
 Config.set('graphics', 'maxfps', '30')
@@ -150,6 +150,10 @@ KV = """
                 id: rvbox
                 default_size: None, app.button_scale * .5
                 default_size_hint: 1, None
+        WideButton:
+            text: "Reload Remote Queue"
+            on_release: app.database_created(force_autoload=True)
+            on_release: root.dismiss()
         WideButton:
             text: "App Settings"
             on_release: app.open_settings()
@@ -1465,9 +1469,9 @@ class ResoundingDatastream(NormalApp):
             self.not_connected_popup.dismiss()
             self.not_connected_popup = None
 
-    def database_created(self):
+    def database_created(self, force_autoload=False):
         self.close_not_connected_popup()
-        if self.autoload_queue:
+        if self.autoload_queue or force_autoload:
             self.load_queue_local(None, background=True, keep_queue_type=True)
             self.player.queue_load(self.autoplay, keep_queue_type=True)
         else:
