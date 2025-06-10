@@ -495,12 +495,34 @@ Builder.load_string("""
         on_release: root.player.queue_preset('Recently Played')
         on_release: root.dismiss()
     MenuButton:
-        text: "Random Unplayed Songs"
-        on_release: root.player.queue_preset('Random Unplayed')
-        on_release: root.dismiss()
-    MenuButton:
         text: "Newest Songs"
         on_release: root.player.queue_preset('Newest')
+        on_release: root.dismiss()
+    SmallSpacer:
+    MenuButton:
+        text: "Playing Genre"
+        on_release: root.player.queue_same_genre()
+        on_release: root.dismiss()
+    MenuButton:
+        text: "Playing Artist"
+        on_release: root.player.queue_same_artist()
+        on_release: root.dismiss()
+    MenuButton:
+        text: "Playing Album"
+        on_release: root.player.queue_same_album()
+        on_release: root.dismiss()
+    MenuButton:
+        text: "Playlist Next Similar"
+        on_release: root.player.queue_same_next()
+        on_release: root.dismiss()
+    MenuButton:
+        text: "Playlist Previous Similar"
+        on_release: root.player.queue_same_previous()
+        on_release: root.dismiss()
+    SmallSpacer:
+    MenuButton:
+        text: "Random Unplayed Songs"
+        on_release: root.player.queue_preset('Random Unplayed')
         on_release: root.dismiss()
     MenuButton:
         text: "Random Genre"
