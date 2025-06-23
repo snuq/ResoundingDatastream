@@ -3,7 +3,12 @@
 #   needs to announce playing song title/artist to android - partially implemented, does not auto-update
 #   bug: android 6 will not load queue
 #   bluetooth pause needs to be able to resume when app is not active
-#   May have issues with foreground service in android 15+ - 6 hour time limit, needs a service type? "android:foregroundServiceType.mediaPlayback", need permission "FOREGROUND_SERVICE_MEDIA_PLAYBACK": https://developer.android.com/develop/background-work/services/fgs/service-types#media
+#   May have issues with foreground service in android 14+, need to specify service type
+#       https://developer.android.com/develop/background-work/services/fgs/service-types#media
+#       needs a service type? "android:foregroundServiceType mediaPlayback", probably needs to be called in manifest file somewhere?
+#       need permission "FOREGROUND_SERVICE_MEDIA_PLAYBACK"?
+#       maybe need to edit .buildozer/android/platform/python-for-android/pythonforandroid/bootstraps/common/build/src/main/java/org/kivy/android to pass in "FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK" to the "startForeground" function call... somehow
+
 
 from kivy.config import Config
 Config.set('graphics', 'maxfps', '30')
