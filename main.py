@@ -1764,6 +1764,7 @@ class ResoundingDatastream(NormalApp):
     def on_pause(self):
         """Called when the app is suspended or paused, need to make sure things are saved because it might not come back"""
 
+        self.check_window()
         self.save_settings()
         self.config.write()
         if self.player:
@@ -1779,6 +1780,7 @@ class ResoundingDatastream(NormalApp):
 
     def on_stop(self):
         """Called when the app is about to be ended"""
+        self.check_window()
         self.wakelock.release()
         try:
             self.player.database.cancel_load = True
