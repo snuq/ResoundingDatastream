@@ -712,7 +712,7 @@ class LoadingPopup(AnimatedModalView):
 
 
 class ResoundingDatastream(NormalApp):
-    test = BooleanProperty(True)
+    test = BooleanProperty(False)
     icon = 'data/iconbwsmall.png'
     animation_length = 0.333
     desktop = BooleanProperty(True)
