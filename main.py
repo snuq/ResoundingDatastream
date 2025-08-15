@@ -785,7 +785,9 @@ class ResoundingDatastream(NormalApp):
         self.theme.data_to_theme(theme_blank)
 
     def run_test(self):
-        self.message(str(self.player.song_queue.verify_song_queue()))
+        self.player.database.music_folder = '2'
+        #self.message(str(self.player.song_queue.verify_song_queue()))
+        print(self.player.get_music_folders())
 
     def open_list_popup(self, queue, close_text):
         self.dismiss_popup()
@@ -1142,7 +1144,7 @@ class ResoundingDatastream(NormalApp):
         if completed:
             self.update_connection_status(True, "")
         else:
-            self.update_connection_status(False, "Unable To "+name)
+            self.update_connection_status(False, "Unable To "+name+": "+self.player.database.status)
         self.end_blocking_thread(name)
 
     def blocking_thread_function(self, name, function, *args):
@@ -1161,7 +1163,7 @@ class ResoundingDatastream(NormalApp):
             if completed:
                 self.update_connection_status(True, "")
             else:
-                status = "Unable To "+name
+                status = "Unable To "+name+": "+self.player.database.status
                 self.update_connection_status(False, status)
         self.end_blocking_thread(name)
 

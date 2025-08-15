@@ -93,6 +93,10 @@ def verify_list(dict_list, elements, defaults=None, strict=True, remove=None):
     return verified_list
 
 
+def veify_music_folders(dict_list, strict=True):
+    return verify_list(dict_list, ['id', 'name'], defaults=[None, None], strict=strict)
+
+
 def verify_artist(dictionary, strict=True):
     return verify_dict(dictionary, artist_keys, defaults=artist_defaults, strict=strict)
 
@@ -151,6 +155,7 @@ class Database(EventDispatcher):
     cancel_load = BooleanProperty(False)
     allow_cancel = BooleanProperty(False)
     loading_status = StringProperty('')
+    music_folder = StringProperty(None, allownone=True)
 
     @mainthread
     def set_allow_cancel(self, status):
@@ -325,6 +330,14 @@ class Database(EventDispatcher):
         return result
 
     #server get communication functions
+    def get_music_folders(self, timeout=None):
+        #Returns a list of available music folders in dict format, each folder should have 'id' and 'name' elements
+        data = self.get_request_format('getMusicFolders', ['musicFolders'], timeout=timeout)
+        if data is not None:
+            if 'musicFolder' in data.keys():
+                return veify_music_folders(data['musicFolder'])
+        return None
+
     def get_queue(self, timeout=None):  #getPlayQueue
         #Returns a list of song dict items (queue list), a song id (current song id), and an integer (playback position)
         data = self.get_request_format('getPlayQueue', ['playQueue'], timeout=timeout)
@@ -363,7 +376,7 @@ class Database(EventDispatcher):
         return response
 
     def get_search(self, query, song_size=None, song_offset=None, artist_size=None, artist_offset=None, album_size=None, album_offset=None, timeout=None):  #search3
-        data = self.get_request_format('search3', ['searchResult3'], params=self.verify_params(['query', 'artistCount', 'artistOffset', 'albumCount', 'albumOffset', 'songCount', 'songOffset'], [query, artist_size, artist_offset, album_size, album_offset, song_size, song_offset]), timeout=timeout)
+        data = self.get_request_format('search3', ['searchResult3'], params=self.verify_params(['musicFolderId', 'query', 'artistCount', 'artistOffset', 'albumCount', 'albumOffset', 'songCount', 'songOffset'], [self.music_folder, query, artist_size, artist_offset, album_size, album_offset, song_size, song_offset]), timeout=timeout)
         return data
 
     def get_search_artist(self, query, size=20, offset=0, timeout=None):
@@ -438,14 +451,14 @@ class Database(EventDispatcher):
 
     def get_artist_list(self, timeout=None):  #getArtists
         #list of artist dict
-        data = self.get_request_format('getArtists', ['artists', 'index'], timeout=timeout)
+        data = self.get_request_format('getArtists', ['artists', 'index'], params=self.verify_params(['musicFolderId'], [self.music_folder]), timeout=timeout)
         data = self.list_combine(data, 'artist')
         return verify_artist_list(data)
 
     def get_album_list(self, list_type='alphabeticalByName', size=None, offset=None, from_year=None, to_year=None, genre=None, timeout=None):  #getAlbumList2
         #returns list of album dict elements
         #list_type must be: random, newest, frequent, recent, starred, alphabeticalByName, alphabeticalByArtist, byYear, byGenre
-        data = self.get_request_format('getAlbumList2', ['albumList2', 'album'], params=self.verify_params(['type', 'size', 'offset', 'fromYear', 'toYear', 'genre'], [list_type, size, offset, from_year, to_year, genre]), timeout=timeout)
+        data = self.get_request_format('getAlbumList2', ['albumList2', 'album'], params=self.verify_params(['musicFolderId', 'type', 'size', 'offset', 'fromYear', 'toYear', 'genre'], [self.music_folder, list_type, size, offset, from_year, to_year, genre]), timeout=timeout)
         return verify_album_list(data)
 
     def get_full_list(self, get_function, max_size=500, **kwargs):
@@ -488,7 +501,7 @@ class Database(EventDispatcher):
 
     def get_album_list_favorite(self, timeout=None):
         #list of album dict
-        data = self.get_request_format('getStarred2', ['starred2', 'album'], timeout=timeout)
+        data = self.get_request_format('getStarred2', ['starred2', 'album'], params=self.verify_params(['musicFolderId'], [self.music_folder]), timeout=timeout)
         return verify_album_list(data)
 
     def get_album_list_artist(self, artistid, timeout=None):
@@ -515,17 +528,17 @@ class Database(EventDispatcher):
 
     def get_song_list_random(self, size=None, from_year=None, to_year=None, genre=None, timeout=None):  #getRandomSongs
         #list of song dict
-        data = self.get_request_format('getRandomSongs', ['randomSongs', 'song'], params=self.verify_params(['size', 'genre', 'fromYear', 'toYear'], [size, genre, from_year, to_year]), timeout=timeout)
+        data = self.get_request_format('getRandomSongs', ['randomSongs', 'song'], params=self.verify_params(['musicFolderId', 'size', 'genre', 'fromYear', 'toYear'], [self.music_folder, size, genre, from_year, to_year]), timeout=timeout)
         return verify_song_list(data)
 
     def get_song_list_genre(self, genre, size=None, offset=None, timeout=None):  #getSongsByGenre
         #returns list of song dicts
-        data = self.get_request_format('getSongsByGenre', ['songsByGenre', 'song'], params=self.verify_params(['genre', 'count', 'offset'], [genre, size, offset]), timeout=timeout)
+        data = self.get_request_format('getSongsByGenre', ['songsByGenre', 'song'], params=self.verify_params(['musicFolderId', 'genre', 'count', 'offset'], [self.music_folder, genre, size, offset]), timeout=timeout)
         return verify_song_list(data)
 
     def get_song_list_favorite(self, timeout=None):  #getStarred2
         #list of song dict
-        data = self.get_request_format('getStarred2', ['starred2', 'song'], timeout=timeout)
+        data = self.get_request_format('getStarred2', ['starred2', 'song'], params=self.verify_params(['musicFolderId'], [self.music_folder]), timeout=timeout)
         return verify_song_list(data)
 
     def get_song_list_artist(self, artistid, timeout=None):

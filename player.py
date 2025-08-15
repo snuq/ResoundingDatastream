@@ -291,6 +291,13 @@ class Player(EventDispatcher):
                 song[valuename] = value
 
     #Functions useful to widgets
+    def get_music_folders(self):
+        music_folders = self.database.get_music_folders()
+        if music_folders is None:
+            return [{'id': None, 'name': 'No Library Specified'}]
+        else:
+            return [{'id': None, 'name': 'No Library Specified'}] + music_folders
+
     def get_playlists(self):
         if not self.playlists:
             playlists = self.database_get_playlist_list()
@@ -1244,7 +1251,7 @@ class Player(EventDispatcher):
         app = App.get_running_app()
         songs = self.database.get_album_list_artist(artistid, timeout=timeout)
         if songs is None:
-            app.update_connection_status(False, "Unable To Load Database")
+            app.update_connection_status(False, self.database.status)
             songs = app.get_cached_list('artist_albums', artistid)
         else:
             app.update_connection_status(True, "")
@@ -1255,7 +1262,7 @@ class Player(EventDispatcher):
         app = App.get_running_app()
         songs = self.database.get_song_list_artist(artistid, timeout=timeout)
         if songs is None:
-            app.update_connection_status(False, "Unable To Load Database")
+            app.update_connection_status(False, self.database.status)
             songs = app.get_cached_list('artist_songs', artistid)
         else:
             app.update_connection_status(True, "")
@@ -1266,7 +1273,7 @@ class Player(EventDispatcher):
         app = App.get_running_app()
         songs = self.database.get_song_list_album(albumid, timeout=timeout)
         if songs is None:
-            app.update_connection_status(False, "Unable To Load Database")
+            app.update_connection_status(False, self.database.status)
             songs = app.get_cached_list('album_songs', albumid)
         else:
             app.update_connection_status(True, "")
@@ -1277,7 +1284,7 @@ class Player(EventDispatcher):
         app = App.get_running_app()
         songs = self.database.get_full_list(self.database.get_song_list_genre, genre=genre, timeout=timeout)
         if songs is None:
-            app.update_connection_status(False, "Unable To Load Database")
+            app.update_connection_status(False, self.database.status)
             songs = app.get_cached_list('genre_songs', genre)
         else:
             app.update_connection_status(True, "")
@@ -1288,7 +1295,7 @@ class Player(EventDispatcher):
         app = App.get_running_app()
         songs = self.database.get_full_list(self.database.get_album_list_genre, genre=genre, timeout=timeout)
         if songs is None:
-            app.update_connection_status(False, "Unable To Load Database")
+            app.update_connection_status(False, self.database.status)
             songs = app.get_cached_list('genre_albums', genre)
         else:
             app.update_connection_status(True, "")
@@ -1299,7 +1306,7 @@ class Player(EventDispatcher):
         app = App.get_running_app()
         songs = self.database.get_genre_list(timeout=timeout)
         if songs is None:
-            app.update_connection_status(False, "Unable To Load Database")
+            app.update_connection_status(False, self.database.status)
             songs = app.get_cached_list('genres', "")
         else:
             app.update_connection_status(True, "")
@@ -1310,7 +1317,7 @@ class Player(EventDispatcher):
         app = App.get_running_app()
         songs = self.database.get_song_list_favorite(timeout=timeout)
         if songs is None:
-            app.update_connection_status(False, "Unable To Load Database")
+            app.update_connection_status(False, self.database.status)
             songs = app.get_cached_list('songs_favorites', "")
         else:
             app.update_connection_status(True, "")
@@ -1327,7 +1334,7 @@ class Player(EventDispatcher):
         app = App.get_running_app()
         songs = self.database.get_album_list_favorite(timeout=timeout)
         if songs is None:
-            app.update_connection_status(False, "Unable To Load Database")
+            app.update_connection_status(False, self.database.status)
             songs = app.get_cached_list('albums_favorites', "")
         else:
             app.update_connection_status(True, "")
@@ -1339,7 +1346,7 @@ class Player(EventDispatcher):
 
         playlist_data = self.database.get_playlist(playlistid, timeout=timeout)
         if playlist_data is None:
-            app.update_connection_status(False, "Unable To Load Database")
+            app.update_connection_status(False, self.database.status)
             songs = app.get_cached_list('playlist_songs', playlistid)
         else:
             songs = playlist_data[1]
@@ -1352,7 +1359,7 @@ class Player(EventDispatcher):
         playlists = self.database.get_playlist_list(timeout=timeout)
         playlists = verify_playlist_list(playlists)
         if playlists is None:
-            app.update_connection_status(False, "Unable To Load Database")
+            app.update_connection_status(False, self.database.status)
             playlists = app.get_cached_list('playlists', "")
         else:
             app.update_connection_status(True, "")
@@ -1368,7 +1375,7 @@ class Player(EventDispatcher):
             app = App.get_running_app()
             songs = self.database.get_full_list(self.database.get_search_song, query=query, timeout=timeout)
             if songs is None:
-                app.update_connection_status(False, "Unable To Load Database")
+                app.update_connection_status(False, self.database.status)
                 songs = app.get_cached_list('songs', query)
             else:
                 app.update_connection_status(True, "")
@@ -1382,7 +1389,7 @@ class Player(EventDispatcher):
             app = App.get_running_app()
             songs = self.database.get_full_list(self.database.get_search_album, query=query, timeout=timeout)
             if songs is None:
-                app.update_connection_status(False, "Unable To Load Database")
+                app.update_connection_status(False, self.database.status)
                 songs = app.get_cached_list('albums', "")
             else:
                 app.update_connection_status(True, "")
@@ -1396,7 +1403,7 @@ class Player(EventDispatcher):
             app = App.get_running_app()
             songs = self.database.get_full_list(self.database.get_search_artist, query=query, timeout=timeout)
             if songs is None:
-                app.update_connection_status(False, "Unable To Load Database")
+                app.update_connection_status(False, self.database.status)
                 songs = app.get_cached_list("artists", "")
             else:
                 app.update_connection_status(True, "")
