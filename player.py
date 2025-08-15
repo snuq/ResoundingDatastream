@@ -225,7 +225,7 @@ class Player(EventDispatcher):
 
     def queue_load_process(self, play, keep_queue_type, timeout):
         app = App.get_running_app()
-        was_playing = self.playing
+        was_playing = self.playing or play
         self.stop()
         songs, current_id, position = self.database.get_queue(timeout=timeout)
         if songs is None:
@@ -238,12 +238,10 @@ class Player(EventDispatcher):
             else:
                 queue_type = 'playlist'
                 queue_id = 'none'
-            self.queue_set(songs, queue_type, queue_id, current_song=current_index)
+            self.queue_set(songs, queue_type, queue_id, current_song=current_index, was_playing=was_playing, mode='init')
             self.set_song_position(position)
             self.queue_changed = True
             app.message('Loaded remote queue')
-            if play or was_playing:
-                self.play()
         return True
 
     def queue_save(self, app):
@@ -273,7 +271,7 @@ class Player(EventDispatcher):
         else:
             queue_type = 'playlist'
             queue_id = 'none'
-        self.queue_set(songs, queue_type, queue_id, current_song=queue_index)
+        self.queue_set(songs, queue_type, queue_id, current_song=queue_index, mode='init')
         if not background:
             app.message('Loaded local queue')
             if play or was_playing:
@@ -395,18 +393,19 @@ class Player(EventDispatcher):
         if not self.song_id:
             self.stop()
 
-    def queue_set(self, queue, queue_type, queue_id, current_song=None, mode='replace', set_index=0):
+    def queue_set(self, queue, queue_type, queue_id, current_song=None, mode='replace', set_index=0, was_playing=None):
         #current_song is the index of the currently playing song, if set, will update index without changing playback
-        #mode can be: replace, prepend/start, append/end, next/insert (or any other)
-        was_playing = self.playing
+        #mode can be: replace, init (like replace but does not skip to random), prepend/start, append/end, next/insert (or any other)
+        if was_playing is None:
+            was_playing = self.playing
         self.stop()
         if not queue:
-            if mode != 'replace':
+            if mode not in ['replace', 'init']:
                 return
             queue_type = ''
             queue_id = ''
         self.queue_init = False
-        if mode == 'replace':
+        if mode in ['replace', 'init']:
             self.queue = queue
         elif mode in ['prepend', 'start']:
             if current_song is not None:
