@@ -541,9 +541,9 @@ class Player(EventDispatcher):
             self.set_values(songid, 'userRating', rating)
             app.message('Set rating on '+element_type+': '+songid)
             if element_type == 'album':
-                app.add_cached_list('albums', "", None)
+                app.add_cached_list('albums', "", None, music_folder=self.database.music_folder)
             else:
-                app.add_cached_list('songs', "", None)
+                app.add_cached_list('songs', "", None, music_folder=self.database.music_folder)
         else:
             app.message('Unable to set rating on: '+songid)
         self.queue_changed = True
@@ -591,9 +591,9 @@ class Player(EventDispatcher):
             self.song_favorite = favorite
             self.set_values(songid, 'starred', favorite)
             if element_type == 'album':
-                app.add_cached_list("albums_favorites", "", None)
+                app.add_cached_list("albums_favorites", "", None, music_folder=self.database.music_folder)
             else:
-                app.add_cached_list("songs_favorites", "", None)
+                app.add_cached_list("songs_favorites", "", None, music_folder=self.database.music_folder)
         else:
             app.message("Unable to set "+mode+" on: "+songid)
         self.queue_changed = True
@@ -1252,10 +1252,10 @@ class Player(EventDispatcher):
         songs = self.database.get_album_list_artist(artistid, timeout=timeout)
         if songs is None:
             app.update_connection_status(False, self.database.status)
-            songs = app.get_cached_list('artist_albums', artistid)
+            songs = app.get_cached_list('artist_albums', artistid, music_folder=self.database.music_folder)
         else:
             app.update_connection_status(True, "")
-            app.add_cached_list('artist_albums', artistid, songs)
+            app.add_cached_list('artist_albums', artistid, songs, music_folder=self.database.music_folder)
         return songs
 
     def database_get_song_list_artist(self, artistid, timeout=None):
@@ -1263,10 +1263,10 @@ class Player(EventDispatcher):
         songs = self.database.get_song_list_artist(artistid, timeout=timeout)
         if songs is None:
             app.update_connection_status(False, self.database.status)
-            songs = app.get_cached_list('artist_songs', artistid)
+            songs = app.get_cached_list('artist_songs', artistid, music_folder=self.database.music_folder)
         else:
             app.update_connection_status(True, "")
-            app.add_cached_list('artist_songs', artistid, songs)
+            app.add_cached_list('artist_songs', artistid, songs, music_folder=self.database.music_folder)
         return songs
 
     def database_get_song_list_album(self, albumid, timeout=None):
@@ -1274,10 +1274,10 @@ class Player(EventDispatcher):
         songs = self.database.get_song_list_album(albumid, timeout=timeout)
         if songs is None:
             app.update_connection_status(False, self.database.status)
-            songs = app.get_cached_list('album_songs', albumid)
+            songs = app.get_cached_list('album_songs', albumid, music_folder=self.database.music_folder)
         else:
             app.update_connection_status(True, "")
-            app.add_cached_list('album_songs', albumid, songs)
+            app.add_cached_list('album_songs', albumid, songs, music_folder=self.database.music_folder)
         return songs
 
     def database_get_song_list_genre(self, genre, timeout=None):
@@ -1285,10 +1285,10 @@ class Player(EventDispatcher):
         songs = self.database.get_full_list(self.database.get_song_list_genre, genre=genre, timeout=timeout)
         if songs is None:
             app.update_connection_status(False, self.database.status)
-            songs = app.get_cached_list('genre_songs', genre)
+            songs = app.get_cached_list('genre_songs', genre, music_folder=self.database.music_folder)
         else:
             app.update_connection_status(True, "")
-            app.add_cached_list('genre_songs', genre, songs)
+            app.add_cached_list('genre_songs', genre, songs, music_folder=self.database.music_folder)
         return songs
 
     def database_get_album_list_genre(self, genre, timeout=None):
@@ -1296,10 +1296,10 @@ class Player(EventDispatcher):
         songs = self.database.get_full_list(self.database.get_album_list_genre, genre=genre, timeout=timeout)
         if songs is None:
             app.update_connection_status(False, self.database.status)
-            songs = app.get_cached_list('genre_albums', genre)
+            songs = app.get_cached_list('genre_albums', genre, music_folder=self.database.music_folder)
         else:
             app.update_connection_status(True, "")
-            app.add_cached_list('genre_albums', genre, songs)
+            app.add_cached_list('genre_albums', genre, songs, music_folder=self.database.music_folder)
         return songs
 
     def database_get_genre_list(self, timeout=None):
@@ -1318,10 +1318,10 @@ class Player(EventDispatcher):
         songs = self.database.get_song_list_favorite(timeout=timeout)
         if songs is None:
             app.update_connection_status(False, self.database.status)
-            songs = app.get_cached_list('songs_favorites', "")
+            songs = app.get_cached_list('songs_favorites', "", music_folder=self.database.music_folder)
         else:
             app.update_connection_status(True, "")
-            app.add_cached_list('songs_favorites', "", songs)
+            app.add_cached_list('songs_favorites', "", songs, music_folder=self.database.music_folder)
         return songs
 
     def database_get_song_list_rating(self, rating, timeout=None):
@@ -1335,10 +1335,10 @@ class Player(EventDispatcher):
         songs = self.database.get_album_list_favorite(timeout=timeout)
         if songs is None:
             app.update_connection_status(False, self.database.status)
-            songs = app.get_cached_list('albums_favorites', "")
+            songs = app.get_cached_list('albums_favorites', "", music_folder=self.database.music_folder)
         else:
             app.update_connection_status(True, "")
-            app.add_cached_list('albums_favorites', "", songs)
+            app.add_cached_list('albums_favorites', "", songs, music_folder=self.database.music_folder)
         return songs
 
     def database_get_song_list_playlist(self, playlistid, timeout=None):
@@ -1376,10 +1376,10 @@ class Player(EventDispatcher):
             songs = self.database.get_full_list(self.database.get_search_song, query=query, timeout=timeout)
             if songs is None:
                 app.update_connection_status(False, self.database.status)
-                songs = app.get_cached_list('songs', query)
+                songs = app.get_cached_list('songs', query, music_folder=self.database.music_folder)
             else:
                 app.update_connection_status(True, "")
-                app.add_cached_list('songs', query, songs)
+                app.add_cached_list('songs', query, songs, music_folder=self.database.music_folder)
         else:
             songs = self.database.get_full_list(self.database.get_search_song, query=query, timeout=timeout)
         return songs
@@ -1390,10 +1390,10 @@ class Player(EventDispatcher):
             songs = self.database.get_full_list(self.database.get_search_album, query=query, timeout=timeout)
             if songs is None:
                 app.update_connection_status(False, self.database.status)
-                songs = app.get_cached_list('albums', "")
+                songs = app.get_cached_list('albums', "", music_folder=self.database.music_folder)
             else:
                 app.update_connection_status(True, "")
-                app.add_cached_list('albums', "", songs)
+                app.add_cached_list('albums', "", songs, music_folder=self.database.music_folder)
         else:
             songs = self.database.get_full_list(self.database.get_search_album, query=query, timeout=timeout)
         return songs
@@ -1404,10 +1404,10 @@ class Player(EventDispatcher):
             songs = self.database.get_full_list(self.database.get_search_artist, query=query, timeout=timeout)
             if songs is None:
                 app.update_connection_status(False, self.database.status)
-                songs = app.get_cached_list("artists", "")
+                songs = app.get_cached_list("artists", "", music_folder=self.database.music_folder)
             else:
                 app.update_connection_status(True, "")
-                app.add_cached_list("artists", "", songs)
+                app.add_cached_list("artists", "", songs, music_folder=self.database.music_folder)
         else:
             songs = self.database.get_full_list(self.database.get_search_artist, query=query, timeout=timeout)
         return songs

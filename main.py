@@ -1,6 +1,7 @@
 #todo:
 #   need to figure out how to receive wired headset media key on android
 #   needs to announce playing song title/artist to android - partially implemented, does not auto-update
+#   implement music folder support in interface - use database.get_music_folders(), set database.music_folder
 #   bug: android 6 will not load queue
 #   bluetooth pause needs to be able to resume when app is not active
 #   May have issues with foreground service in android 14+, need to specify service type
@@ -711,7 +712,7 @@ class LoadingPopup(AnimatedModalView):
 
 
 class ResoundingDatastream(NormalApp):
-    test = BooleanProperty(False)
+    test = BooleanProperty(True)
     icon = 'data/iconbwsmall.png'
     animation_length = 0.333
     desktop = BooleanProperty(True)
@@ -785,7 +786,7 @@ class ResoundingDatastream(NormalApp):
         self.theme.data_to_theme(theme_blank)
 
     def run_test(self):
-        self.player.database.music_folder = '2'
+        self.player.database.music_folder = '1'
         #self.message(str(self.player.song_queue.verify_song_queue()))
         print(self.player.get_music_folders())
 
@@ -851,12 +852,15 @@ class ResoundingDatastream(NormalApp):
         list_folder = os.path.join(cache_folder, "lists")
         return list_folder
 
-    def get_cached_list(self, listtype, listid):
+    def get_cached_list(self, listtype, listid, music_folder=None):
         #listtype may be: artists, artist_albums, artist_songs, album_songs, genre_songs, genre_albums, genres,
         #   songs_favorites, albums_favorites, albums, playlist_songs, playlists, songs,
         if self.cache_songlists:
             #songlist cacheing enabled
-            filename = listtype + '_' + listid
+            if music_folder is not None:
+                filename = listtype + '_' + music_folder + '_' + listid
+            else:
+                filename = listtype + '_' + listid
             if filename in self.local_cache_lists.keys():
                 #songlist is cached
                 data = self.local_cache_lists[filename]
@@ -871,11 +875,14 @@ class ResoundingDatastream(NormalApp):
                 return data
         return None
 
-    def add_cached_list(self, listtype, listid, data):
+    def add_cached_list(self, listtype, listid, data, music_folder=None):
         list_folder = self.get_cache_list_folder()
         if not os.path.exists(list_folder):
             os.makedirs(list_folder)
-        filename = listtype+'_'+listid
+        if music_folder is not None:
+            filename = listtype + '_' + music_folder + '_' + listid
+        else:
+            filename = listtype + '_' + listid
         filepath = os.path.join(list_folder, filename)
         remove_file(filepath)
         if not data and filename in self.local_cache_lists.keys():
