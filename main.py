@@ -2,7 +2,6 @@
 #   need to figure out how to receive wired headset media key on android
 #   needs to announce playing song title/artist to android - partially implemented, does not auto-update
 #   implement music folder support in interface - use database.get_music_folders(), set database.music_folder
-#   bug: android 6 will not load queue
 #   bluetooth pause needs to be able to resume when app is not active
 #   May have issues with foreground service in android 14+, need to specify service type
 #       https://developer.android.com/develop/background-work/services/fgs/service-types#media
