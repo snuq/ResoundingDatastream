@@ -752,15 +752,15 @@ class Player(EventDispatcher):
         elif mode == 'track':
             self.queue.sort(key=lambda a: a['track'])
         elif mode == 'artist':
-            self.queue.sort(key=lambda a: a['artist'])
+            self.queue.sort(key=lambda a: a['artist'].lower())
         elif mode == 'album':
-            self.queue.sort(key=lambda a: a['album'])
+            self.queue.sort(key=lambda a: a['album'].lower())
         elif mode == 'rating':
             self.queue.sort(key=lambda a: a['userRating'])
         elif mode == 'playcount':
             self.queue.sort(key=lambda a: a['playCount'])
         else:
-            self.queue.sort(key=lambda a: a['title'])
+            self.queue.sort(key=lambda a: a['title'].lower())
         if self.song_id:
             self.queue_index = self.get_key_index(self.song_id, self.queue)
         self.song_queue_set_queue()

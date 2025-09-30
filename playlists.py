@@ -1619,6 +1619,12 @@ class WidgetDatabase(WidgetListBrowse):
             else:
                 self.data.sort(key=lambda a: a[key], reverse=app.sort_reverse)
 
+        def sort_by_text_key(key, reverse=False):
+            if reverse:
+                self.data.sort(key=lambda a: a[key].lower(), reverse=not app.sort_reverse)
+            else:
+                self.data.sort(key=lambda a: a[key].lower(), reverse=app.sort_reverse)
+
         if self.data_mode == 'song':
             sm = app.sort_mode_song
             try:
@@ -1627,10 +1633,12 @@ class WidgetDatabase(WidgetListBrowse):
                 elif sm == 'track':
                     sort_by_key('track')
                 elif sm == 'album':
-                    self.data.sort(key=itemgetter('album', 'track'), reverse=app.sort_reverse)
+                    #self.data.sort(key=itemgetter('album', 'track'), reverse=app.sort_reverse)
+                    self.data.sort(key=lambda a: (a['album'].lower(), a['track']), reverse=app.sort_reverse)
                     can_alphaselect = True
                 elif sm == 'artist':
-                    self.data.sort(key=itemgetter('artist', 'title'), reverse=app.sort_reverse)
+                    #self.data.sort(key=itemgetter('artist', 'title'), reverse=app.sort_reverse)
+                    self.data.sort(key=lambda a: (a['artist'].lower(), a['title'].lower()), reverse=app.sort_reverse)
                     can_alphaselect = True
                 elif sm == 'length':
                     sort_by_key('duration', reverse=True)
@@ -1639,10 +1647,10 @@ class WidgetDatabase(WidgetListBrowse):
                 elif sm == 'plays':
                     sort_by_key('playCount', reverse=True)
                 else:
-                    sort_by_key('title')
+                    sort_by_text_key('title')
                     can_alphaselect = True
             except:
-                sort_by_key('title')
+                sort_by_text_key('title')
         elif self.data_mode == 'artist':
             sm = app.sort_mode_artist
             try:
@@ -1653,17 +1661,17 @@ class WidgetDatabase(WidgetListBrowse):
                 elif sm == 'song amount':
                     sort_by_key('songCount', reverse=True)
                 else:
-                    sort_by_key('name')
+                    sort_by_text_key('name')
                     can_alphaselect = True
             except:
-                sort_by_key('name')
+                sort_by_text_key('name')
         elif self.data_mode == 'playlistsong':
             sm = app.sort_mode_playlist
             try:
                 if sm == 'shuffle':
                     self.data.sort(key=lambda x: random.random())
                 elif sm == 'name':
-                    sort_by_key('title')
+                    sort_by_text_key('title')
                     can_alphaselect = True
                 elif sm == 'track':
                     sort_by_key('track')
@@ -1691,10 +1699,10 @@ class WidgetDatabase(WidgetListBrowse):
                 elif sm == 'song amount':
                     sort_by_key('songCount', reverse=True)
                 else:
-                    sort_by_key('name')
+                    sort_by_text_key('name')
                     can_alphaselect = True
             except:
-                sort_by_key('name')
+                sort_by_text_key('name')
         self.set_can_alphaselect(can_alphaselect)
 
     def queue_menu_open(self, button):
