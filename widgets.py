@@ -700,42 +700,39 @@ class AlphabetSelect(SmoothSetting):
             sort_mode = 'title'
         return sort_mode
 
-    def item_index(self, letter, data, data_mode):
+    def first_letter_position(self, letter, data, data_mode):
         letter = letter.lower()
-        app = App.get_running_app()
-        length = len(data)
-        sort_reverse = app.sort_reverse
+        divisor = len(data)
         sort_key = self.get_sort_key(data_mode)
         if sort_key not in ['album', 'artist', 'title', 'name']:
             return -1
-        if sort_reverse:
-            data = reversed(data)
         for index, item in enumerate(data):
             if letter == '#':
                 try:
                     number = int(item[sort_key][0])
-                    return index / length
+                    return index / divisor
                 except:
                     pass
             if item[sort_key].lower().startswith(letter):
-                return index / length
+                return index / divisor
         return -1
 
     def scroll_to_per(self, per):
         #scroll self to the letter at the given percentage of the scrollview
-        per = max(min(per, 1), 0)
-        app = App.get_running_app()
-        data = self.scrollview.data
-        length = len(data)
+        #used to match alphabet scroller to the scrollview when it is moved by the user
+
         data_mode = self.scrollview.owner.data_mode
-        sort_reverse = app.sort_reverse
         sort_key = self.get_sort_key(data_mode)
         if sort_key not in ['album', 'artist', 'title', 'name']:
             return
-        if not sort_reverse:
-            index = length - 1 - int((length - 1) * per)
-        else:
-            index = int((length - 1) * per)
+
+        offset = self.scrollview.height / self.scrollview.viewport_size[1]
+        offset = (1 - per) * offset
+        per = per + offset
+        per = max(min(per, 1), 0)
+        data = self.scrollview.data
+        length = len(data)
+        index = length - int(length * per)  #SHOULD be -1, but not subtracting to prevent rounding errors from this being called after scroll_to_letter
         try:
             current = data[index]
             text = current[sort_key]
@@ -757,17 +754,15 @@ class AlphabetSelect(SmoothSetting):
             pass
 
     def scroll_to_letter(self, letter):
-        app = App.get_running_app()
+        #Scrolls the scrollview to the given letter, used when the alphabet select changes letters
         data_mode = self.scrollview.owner.data_mode
         data = self.scrollview.data
-        per = self.item_index(letter, data, data_mode)
+        per = self.first_letter_position(letter, data, data_mode)
         if per != -1:
             offset = self.scrollview.height / self.scrollview.viewport_size[1]
             offset = per * offset
-            if app.sort_reverse:
-                self.scrollview.scroll_y = per + offset
-            else:
-                self.scrollview.scroll_y = 1 - per - offset
+            per = per + offset
+            self.scrollview.scroll_y = 1 - per
 
     def scroll_to_index(self, index):
         #scroll the scrollview to the given index

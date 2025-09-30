@@ -1,4 +1,5 @@
 #todo:
+#   need to reduce how often lists are downloaded, especially complete song list
 #   need to figure out how to receive wired headset media key on android
 #   needs to announce playing song title/artist to android - partially implemented, does not auto-update
 #   implement music folder support in interface - use database.get_music_folders(), set database.music_folder
@@ -1098,7 +1099,11 @@ class ResoundingDatastream(NormalApp):
             if screen:
                 for child in screen.generated_widgets:
                     if child.widget_type == 'BrowseDatabaseOpener':
-                        return child.go_up()
+                        can_go_up = child.go_up()
+                        if can_go_up:
+                            return True
+                        else:
+                            return False
             return False
 
     @mainthread
@@ -1788,7 +1793,6 @@ class ResoundingDatastream(NormalApp):
 
     def on_stop(self):
         """Called when the app is about to be ended"""
-        self.check_window()
         self.wakelock.release()
         try:
             self.player.database.cancel_load = True

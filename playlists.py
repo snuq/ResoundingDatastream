@@ -1360,6 +1360,9 @@ class WidgetDatabase(WidgetListBrowse):
     def set_can_alphaselect(self, can_alphaselect):
         if can_alphaselect and len(self.data) > 100:
             self.can_alphaselect = True
+            app = App.get_running_app()
+            if app.sort_reverse:
+                self.ids.alphaSelect.scroll_to_element(28, instant=True)
         else:
             self.can_alphaselect = False
             self.ids.alphaSelect.scroll_to_element(0, instant=True)
