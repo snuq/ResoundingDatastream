@@ -1,7 +1,6 @@
 import threading
 import time
 import random
-from operator import itemgetter
 from threading import Thread
 from xmlrpc.client import Boolean
 
@@ -1633,11 +1632,9 @@ class WidgetDatabase(WidgetListBrowse):
                 elif sm == 'track':
                     sort_by_key('track')
                 elif sm == 'album':
-                    #self.data.sort(key=itemgetter('album', 'track'), reverse=app.sort_reverse)
                     self.data.sort(key=lambda a: (a['album'].lower(), a['track']), reverse=app.sort_reverse)
                     can_alphaselect = True
                 elif sm == 'artist':
-                    #self.data.sort(key=itemgetter('artist', 'title'), reverse=app.sort_reverse)
                     self.data.sort(key=lambda a: (a['artist'].lower(), a['title'].lower()), reverse=app.sort_reverse)
                     can_alphaselect = True
                 elif sm == 'length':
@@ -1676,10 +1673,10 @@ class WidgetDatabase(WidgetListBrowse):
                 elif sm == 'track':
                     sort_by_key('track')
                 elif sm == 'album':
-                    self.data.sort(key=itemgetter('album', 'track'), reverse=app.sort_reverse)
+                    self.data.sort(key=lambda a: (a['album'].lower(), a['track']), reverse=app.sort_reverse)
                     can_alphaselect = True
                 elif sm == 'artist':
-                    self.data.sort(key=itemgetter('artist', 'title'), reverse=app.sort_reverse)
+                    self.data.sort(key=lambda a: (a['artist'].lower(), a['title'].lower()), reverse=app.sort_reverse)
                     can_alphaselect = True
                 elif sm == 'length':
                     sort_by_key('duration', reverse=True)
