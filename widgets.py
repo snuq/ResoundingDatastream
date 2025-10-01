@@ -721,6 +721,8 @@ class AlphabetSelect(SmoothSetting):
         #scroll self to the letter at the given percentage of the scrollview
         #used to match alphabet scroller to the scrollview when it is moved by the user
 
+        if self.scrollview.viewport_size[1] == 0:
+            return
         data_mode = self.scrollview.owner.data_mode
         sort_key = self.get_sort_key(data_mode)
         if sort_key not in ['album', 'artist', 'title', 'name']:

@@ -1103,6 +1103,7 @@ class ResoundingDatastream(NormalApp):
                         if can_go_up:
                             return True
                         else:
+                            self.check_window()
                             return False
             return False
 
@@ -1792,7 +1793,9 @@ class ResoundingDatastream(NormalApp):
                 self.wakelock.request()
 
     def on_stop(self):
-        """Called when the app is about to be ended"""
+        if not (Window.top == 0 and Window.left == 0):
+            #when closing app with escape, window position is cleared by this point...
+            self.check_window()
         self.wakelock.release()
         try:
             self.player.database.cancel_load = True
