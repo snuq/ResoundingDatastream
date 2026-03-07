@@ -524,7 +524,7 @@ class NormalApp(App):
         Window.left = self.window_left
         Window.top = self.window_top
 
-    @mainthread
+    #@mainthread
     def window_on_size(self, *_):
         #called when Window.on_resize happens
 

@@ -89,11 +89,12 @@ class Player(EventDispatcher):
             #self.play_mode = self.song_queue.play_mode
             self.song_queue_set_queue()
             self.song_queue.update_index(self.queue_index)
+            song_queue_setup = self.song_queue.setup()
         else:
+            song_queue_setup = self.song_queue.setup()
             is_now_playing = self.song_queue.verify_song_queue()
             if self.playing and not is_now_playing:
                 self.song_queue.end()
-        song_queue_setup = self.song_queue.setup()
         if not song_queue_setup[0]:
             self.song_queue.close()
             self.song_queue = None
