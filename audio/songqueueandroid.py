@@ -152,8 +152,9 @@ class SongQueueAndroid:
     def update_playback_state(self):
         if not self.session:
             return
-        playback_state = create_playback_state(False, self.song_position)
-        self.session.setPlaybackState(playback_state)
+        #playback_state = create_playback_state(False, self.song_position)
+        #self.session.setPlaybackState(playback_state)
+        #self.session.setPlaybackState(None)
         playback_state = create_playback_state(self.playing, self.song_position)
         self.session.setPlaybackState(playback_state)
 
@@ -478,10 +479,12 @@ class SongQueueAndroid:
         self.playing = playing
         if self.on_playing_function:
             self.on_playing_function(playing)
+        self.update_playback_state()
 
     def on_stop(self, *_):
         if self.on_stop_function:
             self.on_stop_function('')
+        self.update_playback_state()
 
     def on_play(self, *_):
         if self.on_play_function:
