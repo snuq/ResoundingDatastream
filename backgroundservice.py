@@ -3,14 +3,25 @@ from oscpy.server import OSCThreadServer
 from oscpy.client import OSCClient
 from jnius import autoclass
 from audio.songqueue import SongQueue
-
+Intent = autoclass('android.content.Intent')
+PendingIntent = autoclass('android.app.PendingIntent')
+app_activity = autoclass('org.kivy.android.PythonActivity')
+m_activity = app_activity.mActivity
+NotificationBuilder = autoclass('android.app.Notification$Builder')
+NotificationManager = autoclass('android.app.NotificationManager')
+NotificationChannel = autoclass('android.app.NotificationChannel')
+Context = autoclass('android.content.Context')
+pythonactivity = autoclass("org.kivy.android.PythonService")
+service = pythonactivity.mService
+Drawable = autoclass("{}.R$drawable".format(service.getPackageName()))
+app_context = service.getApplication().getApplicationContext()
+service_context = service.getApplicationContext()
 NativeInvocationHandler = autoclass('org.jnius.NativeInvocationHandler')
 function_queue = []
 osc_port = 30107
 
 app_paused = False
 from android.broadcast import BroadcastReceiver
-Intent = autoclass('android.content.Intent')
 
 stopping = False
 
@@ -71,12 +82,14 @@ song_queue.on_play_function = on_play
 def receive_set_queue(message):
     global song_queue
     global function_queue
-    queue_string, rating_string = message.split(' || ')
+    queue_string, rating_string, title_string = message.split(' || ')
     queue = queue_string.split(' | ')
     ratings = rating_string.split(' | ')
+    titles = title_string.split(' | ')
+    full_queue = [{'title': title} for title in titles]
     ratings = [int(rating) for rating in ratings]
     log('receive set queue', len(queue))
-    function_queue.append([song_queue.set_queue, [queue, ratings, []], None])
+    function_queue.append([song_queue.set_queue, [queue, ratings, full_queue], None])
 
 
 def receive_add_queue(message):
@@ -248,16 +261,32 @@ def on_headset_plug(context, intent):
         else:
             log('headset plugged')
 
-
 headset_plug_broadcaster = BroadcastReceiver(on_headset_plug, actions=[Intent.ACTION_HEADSET_PLUG])
 headset_plug_broadcaster.start()
 
+
+icon = getattr(Drawable, 'iconbw')
+current_title = ''
+notification_manager = service.getSystemService(Context.NOTIFICATION_SERVICE)
+og_notification_id = notification_manager.getActiveNotifications()[0].getId()
+notification_channel = NotificationChannel('resoundingdatastream', 'resoundingdatastream', NotificationManager.IMPORTANCE_DEFAULT)
+notification_manager.createNotificationChannel(notification_channel)
+
+def update_notification():
+    notification_intent = Intent(app_context, app_activity)
+    current_intent = PendingIntent.getActivity(service, 0, notification_intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE)
+    notification = NotificationBuilder(service_context, 'resoundingdatastream').setContentIntent(current_intent).setContentTitle('Playing: '+current_title).setSmallIcon(icon).build()
+    notification_manager.notify(og_notification_id, notification)
 
 while not stopping:
     while function_queue:
         function, argument, extra = function_queue.pop(0)
         function(argument)
     song_queue.update()
+    song_title = song_queue.get_current_title()
+    if current_title != song_title:
+        current_title = song_title
+        update_notification()
     time.sleep(0.1)
 
 stop_start_time = time.time()
@@ -265,18 +294,15 @@ while True:
     #wait for service to be stopped so it doesnt crash
     if time.time() - stop_start_time > 1:
         #try to resume the main app so it can end the service
-        pythonactivity = autoclass("org.kivy.android.PythonService")
-        m_service = pythonactivity.mService
-        context = m_service.getApplicationContext()
-        package_name = context.getPackageName()
-        package_manager = context.getPackageManager()
+        package_name = service_context.getPackageName()
+        package_manager = service_context.getPackageManager()
         intent = package_manager.getLaunchIntentForPackage(package_name)
-        context.startActivity(intent)
+        service_context.startActivity(intent)
 
         on_stop()
         on_playing(False)
         on_song_position(0)
         on_queue_index(song_queue.queue_index)
         on_next_queue_index(song_queue.next_queue_index)
-        m_service.stopSelf()  #ends the service
+        service.stopSelf()  #ends the service
     time.sleep(0.1)

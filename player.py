@@ -143,7 +143,8 @@ class Player(EventDispatcher):
 
     def song_queue_set_queue(self):
         if self.song_queue:
-            self.song_queue.set_queue(self.song_queue_list_generate())
+            queue_data = self.song_queue_list_generate()
+            self.song_queue.set_queue(queue_data)
 
     def song_queue_list_generate(self):
         app = App.get_running_app()

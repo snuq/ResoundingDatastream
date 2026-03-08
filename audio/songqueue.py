@@ -139,6 +139,13 @@ class SongQueue:
             self.autoupdater.cancel()
             self.autoupdater = None
 
+    def get_current_title(self):
+        try:
+            title = self.full_queue[self.queue_index]['title']
+            return title
+        except:
+            return ''
+
     #player cache functions
     def cache_next(self):
         #start a timed function to cache next song to make switching quicker

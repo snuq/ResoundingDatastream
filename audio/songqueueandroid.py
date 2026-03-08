@@ -296,10 +296,11 @@ class SongQueueAndroid:
 
     def send_queue(self):
         app = App.get_running_app()
-        max_size = 100
+        max_size = 80
         queue_string = ' | '.join(self.queue[:max_size])
         rating_string = ' | '.join(str(rating) for rating in self.queue_ratings[:max_size])
-        send_data = queue_string + ' || ' + rating_string
+        title_string = ' | '.join(data['title'][:32] for data in self.full_queue[:max_size])
+        send_data = queue_string + ' || ' + rating_string + ' || ' + title_string
         try:
             self.send_message(b'/set_queue', send_data)
         except:
@@ -312,11 +313,13 @@ class SongQueueAndroid:
                 next_index_split = max_size * (segment + 1)
                 split_queue = self.queue[index_split:next_index_split]
                 split_rating = self.queue_ratings[index_split:next_index_split]
+                split_full_queue = self.full_queue[index_split:next_index_split]
                 if not split_queue:
                     break
                 queue_string = ' | '.join(split_queue)
                 rating_string = ' | '.join(str(rating) for rating in split_rating)
-                send_data = queue_string + ' || ' + rating_string
+                title_string = ' | '.join(data['title'][:32] for data in split_full_queue)
+                send_data = queue_string + ' || ' + rating_string + ' || ' + title_string
                 self.send_message(b'/add_queue', send_data)
                 segment += 1
 
