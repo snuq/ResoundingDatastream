@@ -152,7 +152,7 @@ class SongQueueAndroid:
     def update_playback_state(self):
         if not self.session:
             return
-        #playback_state = create_playback_state(False, self.song_position)
+        #playback_state = create_playback_state(not self.playing, self.song_position)
         #self.session.setPlaybackState(playback_state)
         #self.session.setPlaybackState(None)
         playback_state = create_playback_state(self.playing, self.song_position)
@@ -166,9 +166,9 @@ class SongQueueAndroid:
         song_artist = song['artist']
         song_album = song['album']
         song_length = song['duration'] * 1000
-        metadataclass = autoclass('android.media.MediaMetadata')
+        MediaMetadata = autoclass('android.media.MediaMetadata')
         MediaMetaDataBuilder = autoclass('android.media.MediaMetadata$Builder')
-        metadata = MediaMetaDataBuilder().putLong(metadataclass.METADATA_KEY_DURATION, song_length).putString(metadataclass.METADATA_KEY_ALBUM, song_album).putString(metadataclass.METADATA_KEY_TITLE, song_title).putString(metadataclass.METADATA_KEY_ARTIST, song_artist).putString(metadataclass.METADATA_KEY_DISPLAY_TITLE, song_title).build()
+        metadata = MediaMetaDataBuilder().putLong(MediaMetadata.METADATA_KEY_DURATION, song_length).putString(MediaMetadata.METADATA_KEY_ALBUM, song_album).putString(MediaMetadata.METADATA_KEY_TITLE, song_title).putString(MediaMetadata.METADATA_KEY_ARTIST, song_artist).putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, song_title).build()
         self.session.setMetadata(metadata)
 
     def setup(self):
