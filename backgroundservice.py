@@ -95,12 +95,14 @@ def receive_set_queue(message):
 def receive_add_queue(message):
     global song_queue
     global function_queue
-    queue_string, rating_string = message.split(' || ')
+    queue_string, rating_string, title_string = message.split(' || ')
     queue = queue_string.split(' | ')
     ratings = rating_string.split(' | ')
+    titles = title_string.split(' | ')
+    full_queue = [{'title': title} for title in titles]
     ratings = [int(rating) for rating in ratings]
     log('receive set queue', len(queue))
-    function_queue.append([song_queue.add_queue, [queue, ratings], None])
+    function_queue.append([song_queue.add_queue, [queue, ratings, full_queue], None])
 
 
 def receive_update_index(message):

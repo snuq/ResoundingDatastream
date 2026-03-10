@@ -291,9 +291,10 @@ class SongQueue:
         self.reset_random_history()
 
     def add_queue(self, data):
-        queue, ratings = data
+        queue, ratings, full_queue = data
         self.queue.extend(queue)
         self.queue_ratings.extend(ratings)
+        self.full_queue.extend(full_queue)
         self.reset_random_history()
 
     def update_index(self, index):
