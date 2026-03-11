@@ -235,7 +235,7 @@ Builder.load_string("""
 <WidgetListQueue>:
     scale: 0.66 if self.blocked else 1
     button_scale: app.button_scale * self.scale
-    text_scale: app.text_scale * self.scale
+    text_scale: min(self.height, root.width / 22)
     canvas.before:
         Color:
             rgba: app.theme.selected if root.edit_mode else (app.theme.button_up[:3]+[0.5])
@@ -282,6 +282,13 @@ Builder.load_string("""
         Screen:
             name: 'normal'
             BoxLayout:
+                #NormalToggle:
+                #    font_size: root.text_scale
+                #    size_hint_x: 1
+                #    size_hint_y: 1
+                #    text: 'Jump'
+                #    on_release: root.jump = not root.jump
+                #    state: 'down' if root.jump else 'normal'
                 WideButton:
                     font_size: root.text_scale
                     size_hint_y: 1
@@ -289,9 +296,9 @@ Builder.load_string("""
                     on_release: root.player.queue_undo()
                     disabled: not root.queue_history
                 NormalLabel:
-                    font_size: root.text_scale
+                    font_size: min(self.height, root.width / 25)
                     size_hint_y: 1
-                    size_hint_x: 2
+                    size_hint_x: 2.5
                     text: str(len(root.queue))+' Songs ('+root.queue_duration_formatted+')'
                 WideButton:
                     font_size: root.text_scale
@@ -363,7 +370,7 @@ Builder.load_string("""
 <WidgetDatabase>:
     scale: 0.66 if self.blocked else 1
     button_scale: app.button_scale * self.scale
-    text_scale: app.text_scale * self.scale
+    text_scale: min(self.height, root.width / 22)
     canvas.before:
         Color:
             rgba: app.theme.selected if root.edit_mode else (app.theme.button_up[:3]+[0.5])
@@ -2100,6 +2107,7 @@ class WidgetListBrowseQueue(WidgetOpener):
 
 
 class WidgetListQueue(WidgetListBrowse):
+    jump = BooleanProperty(True)
     widget_type = StringProperty('BrowseQueue')
     queue = ListProperty()
     queue_duration_formatted = StringProperty('00:00.00')
@@ -2226,6 +2234,28 @@ class WidgetListQueue(WidgetListBrowse):
                 item['selected'] = True
             else:
                 item['selected'] = False
+        rvlayout.refresh_selection()
+        self.scroll_to_index(self.queue_index)
+
+    def pos_is_visible(self, pos):
+        rvview = self.ids['rvview']
+        if rvview.viewport_size == [100, 0]:
+            return False
+        return rvview.vbar[0]+rvview.vbar[1] > pos > rvview.vbar[0]
+
+    def scroll_to_index(self, index):
+        if not self.jump or self.edit_mode:
+            return
+        queue_len = len(self.queue)
+        index_with_offset = index + (index / queue_len)
+        pos = 1 - (index_with_offset / queue_len)
+        if not self.pos_is_visible(pos):
+            rvview = self.ids['rvview']
+            rvview.scroll_y = pos
+            Clock.schedule_once(self.refresh_selection)
+
+    def refresh_selection(self, *_):
+        rvlayout = self.ids['rvlayout']
         rvlayout.refresh_selection()
 
     def on_player(self, *_):
