@@ -62,6 +62,16 @@ Builder.load_string("""
         source: root.cursor_disabled_image if root.disabled else root.cursor_image
         fit_mode: "fill"
 
+<ScrollButton>:
+    canvas:
+        Color: 
+            rgba: app.theme.text
+        Rectangle:
+            size: self.size
+            pos: self.pos
+            source: 'data/scrollup.png' if self.direction == 'up' else 'data/scrolldown.png'
+    
+
 <-CustomScrollbar>:
     rounding: 7
     _handle_y_pos: self.x, self.y + self.height * self.vbar[0]
@@ -669,6 +679,43 @@ def check_swipe(touch, swipe_distance):
         elif y_delta < 0 - swipe_distance:
             swipe = 'up'
     return swipe
+
+
+class ScrollButton(Widget):
+    direction = StringProperty('up')
+    scroller = ObjectProperty()
+    touch_held = BooleanProperty(False)
+    scroll_scheduler = ObjectProperty(allownone=True)
+    touch = ObjectProperty(allownone=True)
+    start_y = NumericProperty(0)
+
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            self.touch_held = True
+            self.start_y = touch.y
+            self.touch = touch
+            self.scroll_scheduler = Clock.schedule_interval(self.autoscroll, 0)
+            return True
+        else:
+            self.touch_held = False
+
+    def autoscroll(self, *_):
+        if self.scroller and self.scroller.viewport_size[1] > self.scroller.height:
+            delta_y = self.touch.y - self.start_y
+            scroll_divisor = self.scroller.height / 1000 / self.scroller.viewport_size[1]
+            if self.direction == 'down':
+                scroll_amount = (-10 - max(delta_y, 0)) * scroll_divisor
+            else:
+                scroll_amount = (10 - min(delta_y, 0)) * scroll_divisor
+            new_scroll_y = self.scroller.scroll_y + scroll_amount
+            self.scroller.scroll_y = min(max(new_scroll_y, 0), 1)
+
+    def on_touch_up(self, touch):
+        if self.scroll_scheduler is not None:
+            self.scroll_scheduler.cancel()
+            self.scroll_scheduler = None
+        self.touch = None
+        self.touch_held = False
 
 
 class CustomScrollbar(ScrollBarY):

@@ -495,9 +495,22 @@ Builder.load_string("""
                 height: self.minimum_height
                 on_click_node: root.click_node(self.selected)
                 on_long_click_node: root.toggle_edit_mode()
-        CustomScrollbar:
-            bar_width: root.button_scale
-            scroller: rvview
+        BoxLayout:
+            orientation: 'vertical'
+            width: root.button_scale
+            size_hint_x: None
+            ScrollButton:
+                scroller: rvview
+                size_hint_y: None
+                height: root.button_scale
+            CustomScrollbar:
+                bar_width: root.button_scale
+                scroller: rvview
+            ScrollButton:
+                scroller: rvview
+                direction: 'down'
+                size_hint_y: None
+                height: root.button_scale
     ScreenManager:
         current: '' if not self.has_screen('normal') else 'select' if root.edit_mode else 'normal'
         size_hint_y: None
