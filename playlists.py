@@ -26,7 +26,7 @@ Builder.load_string("""
     canvas:
         StencilPop
         Color:
-            rgba: 0, 0, 0, 0.5
+            rgba: app.theme.background[:3]+[0.75]
         Rectangle:
             size: app.root.size
             pos: 0, 0
@@ -238,7 +238,7 @@ Builder.load_string("""
     text_scale: app.text_scale * self.scale
     canvas.before:
         Color:
-            rgba: app.theme.selected if root.edit_mode else app.theme.button_up
+            rgba: app.theme.selected if root.edit_mode else (app.theme.button_up[:3]+[0.5])
         BorderImage:
             display_border: [app.display_border, app.display_border, app.display_border, app.display_border]
             size: root.width, root.height
@@ -366,7 +366,7 @@ Builder.load_string("""
     text_scale: app.text_scale * self.scale
     canvas.before:
         Color:
-            rgba: app.theme.selected if root.edit_mode else app.theme.button_up
+            rgba: app.theme.selected if root.edit_mode else (app.theme.button_up[:3]+[0.5])
         BorderImage:
             display_border: [app.display_border, app.display_border, app.display_border, app.display_border]
             size: root.width, root.height
