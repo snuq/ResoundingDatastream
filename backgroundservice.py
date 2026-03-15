@@ -35,37 +35,43 @@ log('init')
 last_play = time.time()
 plays = 0
 
+def send_message(message, data):
+    try:
+        osc_client.send_message(message, data)
+    except:  #the main app may be shut down, dont want to crash
+        pass
+
 
 def on_song_position(message):
     #log('send on song position', message)
-    osc_client.send_message(b"/on_song_position", [str(message).encode("utf8")])
+    send_message(b"/on_song_position", [str(message).encode("utf8")])
 
 
 def on_queue_index(message):
     log('send on queue index', message)
-    osc_client.send_message(b"/on_queue_index", [str(message).encode("utf8")])
+    send_message(b"/on_queue_index", [str(message).encode("utf8")])
 
 
 def on_next_queue_index(message):
     log('send on next queue index', message)
-    osc_client.send_message(b"/on_next_queue_index", [str(message).encode("utf8")])
+    send_message(b"/on_next_queue_index", [str(message).encode("utf8")])
 
 
 def on_playing(message):
     log('send on playing', message)
-    osc_client.send_message(b"/on_playing", [str(message).encode("utf8")])
+    send_message(b"/on_playing", [str(message).encode("utf8")])
 
 
 def on_stop(*_):
     log('send on stop')
-    osc_client.send_message(b"/on_stop", [''.encode("utf8")])
+    send_message(b"/on_stop", [''.encode("utf8")])
     global stopping
     stopping = True
 
 
 def on_play(*_):
     log('send on play')
-    osc_client.send_message(b"/on_play", [''.encode("utf8")])
+    send_message(b"/on_play", [''.encode("utf8")])
 
 
 song_queue = SongQueue()
@@ -223,7 +229,7 @@ def receive_resend(message=None):
 
 
 def receive_ping(*_):
-    osc_client.send_message(b"/on_ping", [''.encode("utf8")])
+    send_message(b"/on_ping", [''.encode("utf8")])
 
 
 osc_client = OSCClient("localhost", osc_port)
