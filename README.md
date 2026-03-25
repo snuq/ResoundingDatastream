@@ -10,6 +10,7 @@ Current Todo (Before release):
 * need to reduce how often lists are downloaded, especially complete song list
 * need to figure out how to receive wired headset media key on android
 * needs to announce playing song title/artist to android - partially implemented, does not auto-update
+* stuff in songqueueandroid that updates song info needs to be moved to backgroundservice, more song queue info needs to be sent over
 * implement music folder support in interface - use database.get_music_folders(), set database.music_folder
 * bluetooth pause needs to be able to resume when app is not active
 * May have issues with foreground service in android 14+, need to specify service type

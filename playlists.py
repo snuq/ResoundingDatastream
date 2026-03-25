@@ -2250,11 +2250,24 @@ class WidgetListQueue(WidgetListBrowse):
         rvlayout.refresh_selection()
         self.scroll_to_index(self.queue_index)
 
+    def _get_vbar(self, rvview):
+        if rvview._viewport is None:
+            return 0, 1.0
+        vh = rvview._viewport.height
+        h = rvview.height
+        if vh < h or vh == 0:
+            return 0, 1.0
+        ph = h / float(vh)
+        sy = min(1.0, max(0.0, rvview.scroll_y))
+        py = (1.0 - ph) * sy
+        return (py, ph)
+
     def pos_is_visible(self, pos):
         rvview = self.ids['rvview']
         if rvview.viewport_size == [100, 0]:
             return False
-        return rvview.vbar[0]+rvview.vbar[1] > pos > rvview.vbar[0]
+        vbar_pos, vbar_size = self._get_vbar(rvview)
+        return vbar_pos+vbar_size > pos > vbar_pos
 
     def scroll_to_index(self, index):
         if not self.jump or self.edit_mode:
