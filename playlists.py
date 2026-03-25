@@ -248,6 +248,7 @@ Builder.load_string("""
     BoxLayout:
         RecycleView:
             id: rvview
+            allow_scroll_buttons: (self.height > (app.button_scale * 5)) and (len(self.data) > 100)
             scroll_distance: 10
             scroll_timeout: 400
             bar_width: 0
@@ -258,10 +259,10 @@ Builder.load_string("""
             data: root.queue_modified
             viewclass: 'SongPlaylistElement'
             SelectableRecycleGridLayout2:
+                id: rvlayout
                 padding: self.spacing[0], 0, self.spacing[0], 0
                 spacing: root.button_scale / 8
                 multiselect: True if root.edit_mode else False
-                id: rvlayout
                 cols: 1
                 default_size: None, root.button_scale
                 default_size_hint: 1, None
@@ -269,11 +270,32 @@ Builder.load_string("""
                 height: self.minimum_height
                 on_click_node: root.click_node(self.selected)
                 on_long_click_node: root.toggle_edit_mode(self.long_click)
-        CustomScrollbar:
-            show_selected_point: True
-            selected_point: root.queue_index / (len(root.queue) - 1) if len(root.queue) > 1 else 0
-            bar_width: root.button_scale
-            scroller: rvview
+        BoxLayout:
+            orientation: 'vertical'
+            width: root.button_scale
+            size_hint_x: None
+            ScrollButton:
+                disabled: not rvview.allow_scroll_buttons
+                scroller: rvview
+                size_hint_y: None
+                height: 0 if self.disabled else root.button_scale
+            CustomScrollbar:
+                show_selected_pont: True
+                selected_point: root.queue_index / (len(root.queue) - 1) if len(root.queue) > 1 else 0
+                bar_width: root.button_scale
+                scroller: rvview
+            ScrollButton:
+                disabled: not rvview.allow_scroll_buttons
+                scroller: rvview
+                direction: 'down'
+                size_hint_y: None
+                height: 0 if self.disabled else root.button_scale
+
+        #CustomScrollbar:
+        #    show_selected_point: True
+        #    selected_point: root.queue_index / (len(root.queue) - 1) if len(root.queue) > 1 else 0
+        #    bar_width: root.button_scale
+        #    scroller: rvview
     ScreenManager:
         current: '' if not self.has_screen('normal') else 'select' if root.edit_mode else 'normal'
         size_hint_y: None
