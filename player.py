@@ -25,7 +25,8 @@ class Player(EventDispatcher):
     song_id = StringProperty()
     queue_init = True
     song_art_loaded = False
-    random_amount = 20
+    random_amount = 40
+    recent_amount = 40
     list_amount = 500
     queue_type = StringProperty()  #can be: random, playlist, artist, album, genre, rating, ''
     queue_id = StringProperty()  #id of the currently queued list

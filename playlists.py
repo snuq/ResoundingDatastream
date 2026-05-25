@@ -1916,7 +1916,7 @@ class WidgetDatabase(WidgetListBrowse):
                     self.allow_search = False
                     self.queue_type = 'random'
                     data = [song for song in data if 'created' in song.keys()]
-                    data = sorted(data, key=lambda x: x['created'], reverse=True)[:40]
+                    data = sorted(data, key=lambda x: x['created'], reverse=True)[:self.player.recent_amount]
                 elif levels[1] == 'Recently Played':
                     data = self.player.database_get_search_song(query=search_text, timeout=timeout)
                     if data is None:
@@ -1928,7 +1928,7 @@ class WidgetDatabase(WidgetListBrowse):
                     self.allow_search = False
                     self.queue_type = 'random'
                     data = [song for song in data if 'played' in song.keys()]
-                    data = sorted(data, key=lambda x: x['played'], reverse=True)[:40]
+                    data = sorted(data, key=lambda x: x['played'], reverse=True)[:self.player.recent_amount]
                 elif levels[1] == 'Most Played':
                     data = self.player.database_get_search_song(query=search_text, timeout=timeout)
                     if data is None:
@@ -1939,7 +1939,7 @@ class WidgetDatabase(WidgetListBrowse):
                     self.allow_sort = False
                     self.allow_search = False
                     self.queue_type = 'random'
-                    data = sorted(data, key=lambda x: x['playCount'], reverse=True)[:40]
+                    data = sorted(data, key=lambda x: x['playCount'], reverse=True)[:self.player.recent_amount]
                 else:  #Songs with star ratings
                     data = self.player.database_get_search_song(query=search_text, timeout=timeout)
                     if data is None:
@@ -1973,7 +1973,7 @@ class WidgetDatabase(WidgetListBrowse):
                     data = add_to_dict_list(data, [['widget', 'AlbumPlaylistElement'], ['selectable', True], ['selected', False]])
                     set_mode('album', 'song')
                 elif levels[1] == 'Recently Added':
-                    data = self.player.database_get_album_list(list_type='newest', size=20, timeout=timeout)
+                    data = self.player.database_get_album_list(list_type='newest', size=self.player.recent_amount, timeout=timeout)
                     if data is None:
                         return False
                     data = add_to_dict_list(data, [['widget', 'AlbumPlaylistElement'], ['selectable', True], ['selected', False]])
@@ -1982,7 +1982,7 @@ class WidgetDatabase(WidgetListBrowse):
                     self.allow_search = False
                     self.allow_filter = False
                 elif levels[1] == 'Recently Played':
-                    data = self.player.database_get_album_list(list_type='recent', size=20, timeout=timeout)
+                    data = self.player.database_get_album_list(list_type='recent', size=self.player.recent_amount, timeout=timeout)
                     if data is None:
                         return False
                     data = add_to_dict_list(data, [['widget', 'AlbumPlaylistElement'], ['selectable', True], ['selected', False]])
@@ -1991,7 +1991,7 @@ class WidgetDatabase(WidgetListBrowse):
                     self.allow_search = False
                     self.allow_filter = False
                 elif levels[1] == 'Most Played':
-                    data = self.player.database_get_album_list(list_type='frequent', size=20, timeout=timeout)
+                    data = self.player.database_get_album_list(list_type='frequent', size=self.player.recent_amount, timeout=timeout)
                     if data is None:
                         return False
                     data = add_to_dict_list(data, [['widget', 'AlbumPlaylistElement'], ['selectable', True], ['selected', False]])

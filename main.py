@@ -1438,6 +1438,7 @@ class ResoundingDatastream(NormalApp):
         self.player.mode_set(self.config.get("Settings", "play_mode"))
         self.player.set_scrobbletime(self.config.getfloat("Settings", "scrobbletime"))
         self.player.random_amount = self.config.getint("Settings", "random_size")
+        self.player.recent_amount = self.config.getint("Settings", "recent_size")
         self.player.queue_type = self.config.get("Queue", "queue_type")
         self.player.queue_id = self.config.get("Queue", "queue_id")
         self.player.skiponestar_set(self.config.getboolean("Settings", "skiponestar"))
@@ -1516,7 +1517,8 @@ class ResoundingDatastream(NormalApp):
                 'color_theme': '',
                 'speak_screen': 0,
                 'speak_setting': 0,
-                'random_size': 20,
+                'random_size': 40,
+                'recent_size': 40,
                 'cache_songlists': 1,
                 'volume': 1,
                 'play_mode': 'in order',
@@ -1705,6 +1707,13 @@ class ResoundingDatastream(NormalApp):
             "desc": "Number of songs to load at once when generating random playlists",
             "section": "Settings",
             "key": "random_size"
+        })
+        settingspanel.append({
+            "type": "numeric",
+            "title": "Recent Playlist Size",
+            "desc": "Number of songs to load for recently played and recently added playlists",
+            "section": "Settings",
+            "key": "recent_size"
         })
         settingspanel.append({
             "type": "bool",

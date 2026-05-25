@@ -7,6 +7,9 @@ This program is released under the GNU General Public License
 Note: This is still in beta and has some issues that need to be fixed, especially on android.
 
 Current Todo (Before release):
+* setting rating on other songs in queue causes current rating to change
+* loading a new queue can mess up the queue widget
+* loading new queue with current song in it not behaving properly (restarts song)
 * need to reduce how often lists are downloaded, especially complete song list
 * need to figure out how to receive wired headset media key on android
 * needs to announce playing song title/artist to android - partially implemented, does not auto-update
