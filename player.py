@@ -540,7 +540,8 @@ class Player(EventDispatcher):
             rating = 0
         result = self.database.set_rating(songid, rating)
         if result is not None:
-            self.song_rating = rating
+            if songid == self.song_id:
+                self.song_rating = rating
             self.set_values(songid, 'userRating', rating)
             app.message('Set rating on '+element_type+': '+songid)
             if element_type == 'album':
@@ -591,7 +592,8 @@ class Player(EventDispatcher):
             mode = 'unfavorite'
         if result is not None:
             app.message("Set "+mode+" on: "+songid)
-            self.song_favorite = favorite
+            if self.song_id == songid:
+                self.song_favorite = favorite
             self.set_values(songid, 'starred', favorite)
             if element_type == 'album':
                 app.add_cached_list("albums_favorites", "", None, music_folder=self.database.music_folder)
