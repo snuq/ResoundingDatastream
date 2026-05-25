@@ -2249,6 +2249,7 @@ class WidgetListQueue(WidgetListBrowse):
             if not self.edit_mode:
                 if index == self.queue_index:
                     item_modified['selected'] = True
+                    rvlayout.selects = [item_modified]
                     rvlayout.selected = item_modified
                 else:
                     item_modified['selected'] = False
@@ -2259,7 +2260,6 @@ class WidgetListQueue(WidgetListBrowse):
         self.player.queue_changed = False
         rvlayout = self.ids.rvlayout
         rvlayout.refresh_selection()
-        rvlayout.refresh_selects()
         self.queue_duration_formatted = timecode_hours(duration)
 
     def on_queue_index(self, *_):
