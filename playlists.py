@@ -280,7 +280,7 @@ Builder.load_string("""
                 size_hint_y: None
                 height: 0 if self.disabled else root.button_scale
             CustomScrollbar:
-                show_selected_pont: True
+                show_selected_point: True
                 selected_point: root.queue_index / (len(root.queue) - 1) if len(root.queue) > 1 else 0
                 bar_width: root.button_scale
                 scroller: rvview
@@ -290,12 +290,6 @@ Builder.load_string("""
                 direction: 'down'
                 size_hint_y: None
                 height: 0 if self.disabled else root.button_scale
-
-        #CustomScrollbar:
-        #    show_selected_point: True
-        #    selected_point: root.queue_index / (len(root.queue) - 1) if len(root.queue) > 1 else 0
-        #    bar_width: root.button_scale
-        #    scroller: rvview
     ScreenManager:
         current: '' if not self.has_screen('normal') else 'select' if root.edit_mode else 'normal'
         size_hint_y: None
@@ -2258,6 +2252,7 @@ class WidgetListQueue(WidgetListBrowse):
             queue_modified.append(item_modified)
         self.queue_modified = queue_modified
         self.player.queue_changed = False
+        self.queue_index = self.player.queue_index
         rvlayout = self.ids.rvlayout
         rvlayout.refresh_selection()
         self.queue_duration_formatted = timecode_hours(duration)
