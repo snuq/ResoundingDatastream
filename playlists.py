@@ -657,7 +657,7 @@ Builder.load_string("""
                 scale: min(self.height, self.width / 8)
                 padding: self.scale / 8
                 font_size: self.scale / 2
-                text: "  #"+str(root.track)+", "+root.album
+                text: ("  #"+str(root.track)+", " if root.track else "  ")+root.album
         BoxLayout:
             canvas.before:
                 Color:
